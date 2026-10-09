@@ -1,0 +1,7013 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>うのもどき</title>
+
+<style>
+*{
+    box-sizing:border-box;
+}
+
+html,body{
+    margin:0;
+    width:100%;
+    min-height:100%;
+    font-family:"Segoe UI","Yu Gothic",sans-serif;
+    background:
+        radial-gradient(circle at center,#09803b,#075d2d 50%,#033b1c);
+    color:white;
+}
+
+body{
+    overflow-x:hidden;
+}
+
+#game{
+    width:100%;
+    min-height:100vh;
+    display:grid;
+    grid-template-columns:120px minmax(0,1fr) 120px;
+    grid-template-rows:65px minmax(0,1fr) 155px;
+    gap:5px;
+    padding:6px;
+}
+
+.topbar{
+    grid-column:1 / 4;
+    grid-row:1;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:4px 10px;
+}
+
+.title{
+    font-size:clamp(22px,3vw,34px);
+    font-weight:1000;
+    letter-spacing:2px;
+    text-shadow:0 3px 5px #0009;
+}
+
+.info{
+    display:flex;
+    gap:5px;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+}
+
+.info-box{
+    background:#0007;
+    border:1px solid #ffffff33;
+    border-radius:7px;
+    padding:5px 9px;
+    font-size:12px;
+}
+
+.cpu-player{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.cpu-player.left{
+    grid-column:1;
+    grid-row:2;
+}
+
+.cpu-player.right{
+    grid-column:3;
+    grid-row:2;
+}
+
+.cpu-top{
+    grid-column:2;
+    grid-row:2;
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+}
+
+.cpu-box{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:5px;
+}
+
+.player-name{
+    font-size:13px;
+    font-weight:900;
+    text-align:center;
+}
+
+.cpu-hand{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:70px;
+}
+
+.cpu-hand.vertical{
+    flex-direction:column;
+}
+
+.cpu-hand.vertical .card{
+    margin-top:-45px;
+}
+
+.cpu-hand.vertical .card:first-child{
+    margin-top:0;
+}
+
+.center{
+    grid-column:2;
+    grid-row:2;
+    width:100%;
+    height:100%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:45px;
+}
+
+.zone{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:7px;
+    min-width:70px;
+}
+
+.zone-label{
+    font-size:13px;
+    font-weight:900;
+    text-shadow:0 2px 3px #000;
+}
+
+.zone-label span{
+    color:#ffe45c;
+}
+
+.card{
+    width:48px;
+    height:68px;
+    border:2px solid white;
+    border-radius:7px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    position:relative;
+    flex-shrink:0;
+    user-select:none;
+    box-shadow:
+        0 3px 7px #0009,
+        inset 0 0 0 2px #0002;
+}
+
+.card.red{
+    background:linear-gradient(145deg,#ff4b4b,#c90000);
+}
+
+.card.yellow{
+    background:linear-gradient(145deg,#ffe45c,#dba800);
+    color:#111;
+}
+
+.card.green{
+    background:linear-gradient(145deg,#37df76,#079344);
+}
+
+.card.blue{
+    background:linear-gradient(145deg,#43baff,#0872c9);
+}
+
+.card.black{
+    background:radial-gradient(circle at 35% 30%,#555,#111 70%);
+}
+
+
+.card.back{
+    background:
+        repeating-linear-gradient(
+            45deg,
+            #171717 0,
+            #171717 5px,
+            #292929 5px,
+            #292929 10px
+        );
+}
+
+.card.back::after{
+    content:"うのもどき";
+    font-size:12px;
+    font-weight:1000;
+    transform:rotate(-25deg);
+}
+
+.card-content{
+    font-size:21px;
+    font-weight:1000;
+    text-align:center;
+    line-height:1.05;
+    text-shadow:0 2px 2px #0008;
+}
+
+.card-corner{
+    position:absolute;
+    left:3px;
+    top:2px;
+    font-size:7px;
+    font-weight:900;
+}
+
+.card-corner.bottom{
+    left:auto;
+    right:3px;
+    top:auto;
+    bottom:2px;
+    transform:rotate(180deg);
+}
+
+.center .card{
+    width:65px;
+    height:92px;
+}
+
+.center .card-content{
+    font-size:25px;
+}
+
+.player-area{
+    grid-column:1 / 4;
+    grid-row:3;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-end;
+}
+
+.player-label{
+    font-size:13px;
+    font-weight:900;
+}
+
+.player-hand{
+    width:100%;
+    min-height:90px;
+    display:flex;
+    justify-content:center;
+    align-items:flex-end;
+    gap:3px;
+    flex-wrap:wrap;
+    padding:4px;
+}
+
+.player-card{
+    cursor:pointer;
+    transition:.15s;
+}
+
+.player-card:hover{
+    transform:translateY(-12px) scale(1.04);
+    z-index:50;
+}
+
+.playable{
+    box-shadow:
+        0 0 9px #fff,
+        0 4px 8px #0008;
+}
+
+.unplayable{
+    filter:brightness(.55) saturate(.6);
+}
+
+.exodia-card{
+    background:
+        linear-gradient(
+            145deg,
+            #70420b,
+            #e4b33f 45%,
+            #8b5a16
+        ) !important;
+
+    border-color:#ffe99a !important;
+
+    box-shadow:
+        0 0 7px #ffcc33,
+        0 0 15px #ffbf0088,
+        inset 0 0 8px #fff07866;
+}
+
+.exodia-card .card-content{
+    font-size:8px;
+    line-height:1.05;
+}
+
+.exodia-symbol{
+    font-size:16px;
+    margin-bottom:3px;
+}
+
+.controls{
+    position:fixed;
+    left:50%;
+    bottom:150px;
+    transform:translateX(-50%);
+    display:flex;
+    gap:6px;
+    z-index:100;
+}
+
+button{
+    border:none;
+    border-radius:7px;
+    padding:7px 12px;
+    font-weight:900;
+    cursor:pointer;
+    color:white;
+    background:#222;
+    box-shadow:0 3px 6px #0008;
+}
+
+button:hover{
+    filter:brightness(1.15);
+}
+
+button:disabled{
+    opacity:.4;
+    cursor:not-allowed;
+}
+
+#drawButton{
+    background:#7d2cff;
+}
+
+
+#restartButton{
+    background:#0872c9;
+}
+
+#backToMenuButton{
+    position:fixed;
+    top:12px;
+    right:12px;
+    z-index:6500;
+    padding:8px 12px;
+    border-radius:8px;
+    border:1px solid #9bd8ff;
+    background:#123;
+    color:white;
+    font-size:13px;
+    font-weight:900;
+    box-shadow:0 3px 6px #0008;
+}
+
+#backToMenuButton:hover{
+    filter:brightness(1.15);
+}
+
+
+.message{
+    position:fixed;
+    left:12px;
+    bottom:162px;
+    width:min(300px, 27vw);
+    height:190px;
+    transition:width .2s ease, height .2s ease;
+    background:rgba(8,12,22,.92);
+    border:1px solid #4d6685;
+    border-radius:14px;
+    box-shadow:0 8px 28px #0008;
+    z-index:500;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    backdrop-filter:blur(8px);
+}
+
+.message-header{
+    flex:0 0 auto;
+    min-height:34px;
+    padding:5px 7px 5px 10px;
+    background:rgba(20,34,55,.95);
+    border-bottom:1px solid #40556f;
+    color:#dceeff;
+    font-size:12px;
+    font-weight:900;
+    letter-spacing:.04em;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:6px;
+}
+
+.message-tabs{
+    display:flex;
+    align-items:stretch;
+    gap:0;
+    min-width:0;
+    flex:1;
+    height:32px;
+    border-radius:7px 7px 0 0;
+}
+
+.message-tab{
+    flex:1 1 96px;
+    border:1px solid #40556f;
+    border-bottom:none;
+    border-radius:7px 7px 0 0;
+    background:#101d2c;
+    color:#9fb4ca;
+    padding:5px 10px;
+    font-size:12px;
+    font-weight:900;
+    cursor:pointer;
+    transition:background .12s, color .12s, border-color .12s;
+}
+
+.message-tab + .message-tab{
+    margin-left:3px;
+}
+
+.message-tab.active{
+    background:#29496a;
+    border-color:#6f89a5;
+    color:#fff;
+    box-shadow:inset 0 2px 0 rgba(255,255,255,.16), 0 0 0 1px rgba(139,184,232,.18);
+}
+
+.message-tab:not(.active){
+    opacity:.78;
+}
+
+.message-tab:hover{
+    filter:brightness(1.15);
+}
+
+.online-only-chat{
+    display:inline-flex !important;
+}
+
+.message.chat-mode .message-history{
+    display:none !important;
+}
+
+.message:not(.chat-mode) .chat-panel{
+    display:none !important;
+}
+
+.message.chat-mode .chat-panel{
+    display:flex !important;
+}
+
+.chat-panel{
+    flex:1;
+    min-height:0;
+    display:flex;
+    flex-direction:column;
+}
+
+.chat-history{
+    flex:1;
+    min-height:0;
+    overflow-y:auto;
+    padding:8px;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    scrollbar-width:thin;
+}
+
+.chat-bubble{
+    align-self:flex-start;
+    max-width:92%;
+    padding:6px 9px;
+    border-radius:10px 10px 10px 3px;
+    background:#1c2b40;
+    color:#f4f8ff;
+    font-size:12px;
+    line-height:1.4;
+    font-weight:700;
+    overflow-wrap:anywhere;
+}
+
+.chat-bubble.self{
+    align-self:flex-end;
+    border-radius:10px 10px 3px 10px;
+    background:#315b82;
+}
+
+.chat-name{
+    display:block;
+    color:#a9c9e8;
+    font-size:10px;
+    margin-bottom:2px;
+}
+
+.chat-text{
+    white-space:pre-wrap;
+}
+
+.chat-form{
+    display:flex;
+    gap:5px;
+    padding:6px;
+    border-top:1px solid #40556f;
+}
+
+.chat-input{
+    flex:1;
+    min-width:0;
+    height:32px;
+    box-sizing:border-box;
+    border:1px solid #58718c;
+    border-radius:6px;
+    background:#101d2c;
+    color:#fff;
+    padding:0 8px;
+    font-size:12px;
+    outline:none;
+}
+
+.chat-input:focus{
+    border-color:#8bb8e8;
+}
+
+.chat-send-button{
+    height:32px;
+    padding:0 10px;
+    border:1px solid #6f89a5;
+    border-radius:6px;
+    background:#29496a;
+    color:#fff;
+    font-size:12px;
+    font-weight:900;
+    cursor:pointer;
+}
+
+.chat-send-button:disabled{
+    opacity:.45;
+    cursor:not-allowed;
+}
+
+.message.small .chat-bubble{font-size:10px;padding:4px 6px;}
+.message.large .chat-bubble{font-size:13px;padding:7px 10px;}
+.message.small .chat-input,
+.message.small .chat-send-button{height:28px;font-size:10px;}
+.message.large .chat-input,
+.message.large .chat-send-button{height:36px;font-size:13px;}
+
+.message-title{
+    flex:1;
+    min-width:0;
+}
+
+.message-size-controls{
+    display:flex;
+    gap:3px;
+    flex-shrink:0;
+}
+
+.message-size-button{
+    width:24px;
+    height:24px;
+    padding:0;
+    border:1px solid #6f89a5;
+    border-radius:5px;
+    background:#17283c;
+    color:#fff;
+    font-size:11px;
+    font-weight:900;
+    cursor:pointer;
+    box-shadow:none;
+}
+
+.message-size-button:hover{
+    filter:brightness(1.2);
+}
+
+.message.small{
+    width:min(220px, 22vw);
+    height:110px;
+}
+
+.message.large{
+    width:min(360px, 32vw);
+    height:240px;
+}
+
+.message.small .message-bubble{
+    font-size:10px;
+    padding:4px 6px;
+}
+
+.message.large .message-bubble{
+    font-size:13px;
+    padding:7px 10px;
+}
+
+.message.small @media (max-width:900px){
+    .message{
+        left:8px;
+        bottom:158px;
+        width:min(270px,32vw);
+        height:175px;
+    }
+    .message.small{
+        width:min(200px,25vw);
+        height:105px;
+    }
+    .message.large{
+        width:min(330px,38vw);
+        height:220px;
+    }
+}
+
+.message-history{
+    padding:5px;
+    gap:4px;
+}
+
+.message.large .message-history{
+    padding:9px;
+    gap:7px;
+}
+
+.message-history{
+    flex:1;
+    min-height:0;
+    overflow-y:auto;
+    padding:8px;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    scrollbar-width:thin;
+}
+
+.message-bubble{
+    align-self:flex-start;
+    max-width:92%;
+    padding:6px 9px;
+    border-radius:10px 10px 10px 3px;
+    background:#1c2b40;
+    color:#f4f8ff;
+    font-size:12px;
+    line-height:1.4;
+    font-weight:700;
+    overflow-wrap:anywhere;
+}
+
+.message-bubble.latest{
+    background:#29496a;
+}
+
+.message-bubble.error-log{
+    align-self:stretch;
+    max-width:100%;
+    background:rgba(90,0,0,.92);
+    border:1px solid #ff4b4b;
+    color:#ff5c5c;
+    font-weight:900;
+    white-space:pre-wrap;
+}
+
+.message-bubble.error-log .error-title{
+    color:#ff3030;
+    font-weight:900;
+}
+
+
+.uno-badge{
+    position:fixed;
+    right:15px;
+    top:82px;
+    width:45px;
+    height:45px;
+    background:#e60000;
+    border-radius:50%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-weight:1000;
+    font-size:12px;
+    box-shadow:0 0 15px #f00;
+    animation:pulse 1s infinite alternate;
+    z-index:1000;
+}
+
+
+.target-buttons{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-top:14px;
+}
+
+.target-button{
+    min-height:52px;
+    padding:10px 12px;
+    background:linear-gradient(145deg,#0872c9,#064b87);
+    border:2px solid #9bd8ff;
+    font-size:16px;
+}
+
+.hidden{
+    display:none !important;
+}
+
+@keyframes pulse{
+    from{
+        transform:scale(1);
+    }
+    to{
+        transform:scale(1.12);
+    }
+}
+
+#effectLayer{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    overflow:hidden;
+    z-index:3000;
+}
+
+.effect-text{
+    position:absolute;
+    left:50%;
+    top:43%;
+    transform:translate(-50%,-50%) scale(.3);
+    font-size:clamp(40px,9vw,95px);
+    font-weight:1000;
+    font-style:italic;
+    text-shadow:
+        0 5px #000,
+        0 0 20px currentColor;
+    opacity:0;
+    animation:effectPop 1.1s ease-out forwards;
+}
+
+@keyframes effectPop{
+    0%{
+        opacity:0;
+        transform:
+            translate(-50%,-50%)
+            scale(.2)
+            rotate(-8deg);
+    }
+
+    20%{
+        opacity:1;
+        transform:
+            translate(-50%,-50%)
+            scale(1.25)
+            rotate(5deg);
+    }
+
+    70%{
+        opacity:1;
+        transform:
+            translate(-50%,-50%)
+            scale(1)
+            rotate(-2deg);
+    }
+
+    100%{
+        opacity:0;
+        transform:
+            translate(-50%,-60%)
+            scale(1.5);
+    }
+}
+
+.shake{
+    animation:shake .45s ease-in-out;
+}
+
+@keyframes shake{
+    0%,100%{
+        transform:translate(0);
+    }
+
+    20%{
+        transform:translate(-9px);
+    }
+
+    40%{
+        transform:translate(9px);
+    }
+
+    60%{
+        transform:translate(-6px);
+    }
+
+    80%{
+        transform:translate(6px);
+    }
+}
+
+.overlay{
+    position:fixed;
+    inset:0;
+    background:#000b;
+    z-index:5000;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.modal{
+    width:min(90vw,500px);
+    padding:28px;
+    text-align:center;
+    border-radius:15px;
+    background:
+        linear-gradient(145deg,#174a2d,#082c19);
+    border:2px solid #66ff9c;
+    box-shadow:
+        0 0 35px #00ff6644,
+        0 20px 60px #000;
+}
+
+.modal h1{
+    margin:0 0 15px;
+}
+
+.roulette-name{
+    min-height:70px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    color:#ffdf45;
+    font-size:38px;
+    font-weight:1000;
+}
+
+.start-button{
+    margin-top:15px;
+    background:#e49b00;
+    font-size:16px;
+}
+
+.color-buttons{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:9px;
+}
+
+.color-button{
+    height:52px;
+    border:2px solid white;
+}
+
+.color-button.red{
+    background:#d60000;
+}
+
+.color-button.yellow{
+    background:#e2ad00;
+    color:#111;
+}
+
+.color-button.green{
+    background:#079344;
+}
+
+.color-button.blue{
+    background:#0872c9;
+}
+
+.win-box{
+    width:min(90vw,540px);
+    padding:30px;
+    text-align:center;
+    border-radius:16px;
+    background:
+        linear-gradient(145deg,#174a2d,#082c19);
+    border:2px solid #66ff9c;
+}
+
+.win-box.exodia-win{
+    border-color:#ffd438;
+    box-shadow:
+        0 0 40px #ffbd00,
+        0 0 100px #ff9d0044;
+}
+
+.win-title{
+    font-size:45px;
+    font-weight:1000;
+}
+
+.exodia-win-title{
+    color:#ffd43b;
+    text-shadow:0 0 25px #ff8c00;
+    animation:glow 1s infinite alternate;
+}
+
+@keyframes glow{
+    from{
+        text-shadow:0 0 10px #ff8c00;
+    }
+
+    to{
+        text-shadow:
+            0 0 30px white,
+            0 0 50px #ff8c00;
+    }
+}
+
+.exodia-particle{
+    position:fixed;
+    left:50%;
+    top:50%;
+    width:9px;
+    height:9px;
+    border-radius:50%;
+    background:#ffd83d;
+    box-shadow:0 0 12px #ffae00;
+    pointer-events:none;
+    z-index:6000;
+    animation:particle 1.5s ease-out forwards;
+}
+
+@keyframes particle{
+    0%{
+        transform:translate(0,0) scale(1);
+        opacity:1;
+    }
+
+    100%{
+        transform:
+            translate(
+                calc((var(--x) - 50) * 10px),
+                calc((var(--y) - 50) * 10px)
+            )
+            scale(0);
+        opacity:0;
+    }
+}
+
+@media(max-width:700px){
+
+    #game{
+        grid-template-columns:
+            65px
+            minmax(0,1fr)
+            65px;
+
+        grid-template-rows:
+            55px
+            minmax(0,1fr)
+            135px;
+    }
+
+    .card{
+        width:40px;
+        height:58px;
+    }
+
+    .card-content{
+        font-size:16px;
+    }
+
+    .center{
+        gap:20px;
+    }
+
+    .center .card{
+        width:52px;
+        height:74px;
+    }
+
+    .center .card-content{
+        font-size:19px;
+    }
+
+    .controls{
+        bottom:135px;
+    }
+
+    .message{
+        left:8px;
+        bottom:8px;
+        width:min(300px, calc(100vw - 16px));
+        height:180px;
+    }
+
+    .message-bubble{
+        font-size:11px;
+    }
+
+    .info-box{
+        display:none;
+    }
+
+    .title{
+        font-size:20px;
+    }
+}
+
+
+#turn-indicator{
+    margin:10px auto 14px;
+    padding:10px 18px;
+    width:max-content;
+    max-width:90%;
+    border:2px solid rgba(255,255,255,.45);
+    border-radius:999px;
+    background:rgba(0,0,0,.35);
+    color:#fff;
+    font-size:20px;
+    font-weight:800;
+    text-align:center;
+    box-shadow:0 4px 14px rgba(0,0,0,.2);
+}
+
+
+
+
+/* プレイ進行方向リング */
+#turnDirectionRing{
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:min(32vw,280px);
+    aspect-ratio:1;
+    transform:translate(-50%,-50%);
+    border:5px solid rgba(255,255,255,.24);
+    border-radius:50%;
+    pointer-events:none;
+    z-index:0;
+    filter:drop-shadow(0 0 5px rgba(0,0,0,.35));
+}
+
+#turnDirectionRing::after{
+    content:"↻";
+    position:absolute;
+    left:50%;
+    top:-32px;
+    transform:translateX(-50%);
+    color:#ffe45c;
+    font-size:46px;
+    line-height:1;
+    font-weight:1000;
+    text-shadow:0 2px 4px #0009,0 0 10px #ffe45c88;
+}
+
+#turnDirectionRing.reverse::after{
+    content:"↺";
+}
+
+#turnDirectionRing.hidden{
+    display:none !important;
+}
+
+.center{
+    position:relative;
+}
+
+.center > .zone{
+    position:relative;
+    z-index:2;
+}
+
+@media(max-width:700px){
+    #turnDirectionRing{
+        width:min(48vw,220px);
+        border-width:4px;
+    }
+    #turnDirectionRing::after{
+        top:-27px;
+        font-size:38px;
+    }
+}
+
+#menuOverlay{
+    z-index:9000;
+    background:radial-gradient(circle at center,#0a8f45,#043b1d 65%,#021b0d);
+}
+
+/* モード選択・設定・オンライン画面はゲーム画面を完全に隠す */
+#mainMenuOverlay,
+#settingsOverlay,
+#onlineOverlay{
+    z-index:9000;
+    background:#021b0d !important;
+    opacity:1 !important;
+    isolation:isolate;
+}
+
+.menu-box{
+    width:min(92vw,560px);
+    padding:42px 30px 34px;
+    text-align:center;
+    border-radius:22px;
+    background:linear-gradient(145deg,#123e27,#061f12);
+    border:2px solid #66ff9c;
+    box-shadow:0 0 45px #00ff6655,0 20px 70px #000;
+}
+
+.menu-title-wrap{
+    position:relative;
+    width:100%;
+    min-height:150px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-bottom:4px;
+}
+.menu-title-wrap .menu-title{
+    position:relative;
+    z-index:3;
+    margin:0;
+}
+.title-card-fan{
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:74px;
+    height:104px;
+    transform-origin:50% 115%;
+    pointer-events:none;
+    z-index:1;
+}
+.title-card-fan::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    border:3px solid #fff;
+    border-radius:10px;
+    background:
+        linear-gradient(135deg,transparent 44%,#ffe45c 45%,#ffe45c 55%,transparent 56%),
+        linear-gradient(45deg,transparent 44%,#ffe45c 45%,#ffe45c 55%,transparent 56%),
+        radial-gradient(circle at center,#0872c9 0 28%,#064b87 29% 70%,#021b35 71%);
+    box-shadow:0 7px 15px #0009;
+}
+.title-card-fan:nth-child(1){transform:translate(-50%,-50%) rotate(-32deg) translateY(-2px);}
+.title-card-fan:nth-child(2){transform:translate(-50%,-50%) rotate(-21deg) translateY(-7px);}
+.title-card-fan:nth-child(3){transform:translate(-50%,-50%) rotate(-10deg) translateY(-10px);}
+.title-card-fan:nth-child(4){transform:translate(-50%,-50%) rotate(0deg) translateY(-12px);}
+.title-card-fan:nth-child(5){transform:translate(-50%,-50%) rotate(10deg) translateY(-10px);}
+.title-card-fan:nth-child(6){transform:translate(-50%,-50%) rotate(21deg) translateY(-7px);}
+.title-card-fan:nth-child(7){transform:translate(-50%,-50%) rotate(32deg) translateY(-2px);}
+.menu-title{
+    margin:0;
+    font-size:clamp(38px,9vw,68px);
+    font-weight:1000;
+    letter-spacing:3px;
+    text-shadow:0 5px 0 #0008,0 0 24px #4dff91;
+}
+
+.menu-subtitle{
+    margin:8px 0 28px;
+    color:#ffe45c;
+    font-size:18px;
+    font-weight:900;
+}
+
+.menu-start{
+    min-width:190px;
+    padding:13px 24px;
+    font-size:19px;
+    background:linear-gradient(145deg,#e6a800,#b86d00);
+    border:2px solid #ffe89a;
+}
+
+
+.menu-main-buttons{display:flex;flex-direction:column;gap:12px;align-items:center;}
+.menu-main-btn{min-width:210px;padding:13px 24px;font-size:19px;background:linear-gradient(145deg,#e6a800,#b86d00);border:2px solid #ffe89a;}
+.menu-secondary{background:linear-gradient(145deg,#0872c9,#064b87);border-color:#9bd8ff;}
+.menu-back{margin-top:18px;background:#333;border:1px solid #aaa;}
+.howto-box{max-width:760px;width:min(92vw,760px);max-height:82vh;overflow:auto;text-align:left;}
+.howto-title{text-align:center;margin:0 0 8px;}
+.howto-section{background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:14px 16px;margin:10px 0;}
+.howto-section h3{margin:0 0 8px;font-size:19px;color:#ffe89a;}
+.howto-section p{margin:6px 0;line-height:1.6;}
+.howto-list{margin:6px 0 0;padding-left:22px;line-height:1.65;}
+.howto-card{display:flex;justify-content:space-between;gap:16px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.12);}
+.howto-card:last-child{border-bottom:0;}
+.howto-card strong{min-width:125px;color:#fff;}
+.howto-note{font-size:13px;opacity:.82;}
+
+.settings-box{max-width:520px;}
+.settings-title{margin:0 0 22px;font-size:32px;}
+.settings-row{display:flex;justify-content:space-between;align-items:center;gap:25px;padding:14px 0;border-bottom:1px solid #ffffff33;font-weight:800;}
+.settings-select{min-width:130px;padding:9px 12px;border-radius:8px;border:1px solid #9bd8ff;background:#123;color:white;font-weight:900;font-size:16px;}
+.settings-input{width:min(220px,55vw);padding:9px 12px;border-radius:8px;border:1px solid #9bd8ff;background:#123;color:white;font-weight:900;font-size:16px;text-align:center;}
+.icon-options{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;max-width:300px;}
+.icon-option{width:44px;height:44px;padding:0;border:2px solid #6688aa;border-radius:10px;background:#123;font-size:24px;box-shadow:none;}
+.icon-option.selected{border-color:#ffe45c;box-shadow:0 0 10px #ffe45c88;background:#254b3a;}
+.player-icon{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;margin-right:4px;border-radius:50%;vertical-align:middle;background:#ffffff18;font-size:17px;}
+
+
+.online-waiting-chat{
+    margin:10px 0 4px;
+    padding:8px;
+    border:1px solid #40556f;
+    border-radius:8px;
+    background:#101d2c;
+    text-align:left;
+}
+
+.online-waiting-chat-title{
+    color:#cfe4f8;
+    font-size:12px;
+    font-weight:900;
+    margin-bottom:5px;
+}
+
+.online-waiting-chat-history{
+    height:105px;
+    overflow-y:auto;
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    padding:3px;
+    scrollbar-width:thin;
+}
+
+.online-waiting-chat-message{
+    padding:4px 7px;
+    border-radius:7px;
+    background:#1c2b40;
+    color:#f4f8ff;
+    font-size:11px;
+    line-height:1.35;
+    overflow-wrap:anywhere;
+}
+
+.online-waiting-chat-message.self{
+    background:#315b82;
+}
+
+.online-waiting-chat-name{
+    font-weight:900;
+    color:#a9c9e8;
+    margin-right:5px;
+}
+
+.online-waiting-chat-form{
+    display:flex;
+    gap:5px;
+    margin-top:6px;
+}
+
+.online-waiting-chat-input{
+    flex:1;
+    min-width:0;
+    height:30px;
+    box-sizing:border-box;
+    border:1px solid #58718c;
+    border-radius:6px;
+    background:#0b1623;
+    color:#fff;
+    padding:0 8px;
+    font-size:11px;
+    outline:none;
+}
+
+.online-waiting-chat-input:focus{
+    border-color:#8bb8e8;
+}
+
+.online-waiting-chat-send{
+    height:30px;
+    padding:0 10px;
+    border:1px solid #6f89a5;
+    border-radius:6px;
+    background:#29496a;
+    color:#fff;
+    font-size:11px;
+    font-weight:900;
+    cursor:pointer;
+}
+
+/* オンライン対戦 */
+.online-box{max-width:620px;}
+.online-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:16px;}
+.online-input{width:min(100%,330px);padding:12px 14px;border-radius:9px;border:1px solid #9bd8ff;background:#081b12;color:#fff;font-size:18px;font-weight:800;text-align:center;}
+.online-code{font-size:34px;letter-spacing:7px;font-weight:1000;color:#ffe45c;margin:12px 0;}
+.online-status{min-height:28px;margin:10px 0;color:#dfffea;font-weight:800;}
+.online-list{margin:12px auto;padding:0;list-style:none;max-width:430px;text-align:left;}
+.online-list li{padding:8px 12px;border-bottom:1px solid #ffffff22;}
+.online-small{font-size:13px;color:#c9d8cf;}
+.online-primary{background:linear-gradient(145deg,#0872c9,#064b87);border-color:#9bd8ff;}
+.online-danger{background:linear-gradient(145deg,#9d2d2d,#651717);border-color:#ffaaaa;}
+#onlineBadge{display:none;position:fixed;left:8px;bottom:8px;z-index:6200;padding:7px 11px;border-radius:9px;background:#061b10dd;border:1px solid #66ff9c;font-weight:900;font-size:12px;}
+
+
+.lucky-card-choice.selected{
+    outline:3px solid #ffe45c;
+    transform:scale(1.04);
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+</head>
+
+<body>
+
+<button id="backToMenuButton" type="button">メニューへ戻る</button>
+
+<div id="turn-indicator">現在のターン：—</div>
+
+
+<div id="game">
+
+    <div class="topbar">
+
+        <div class="title">
+            うのもどき
+        </div>
+
+        <div class="info">
+
+            <div class="info-box">
+                ターン:
+                <span id="turnText">準備中</span>
+            </div>
+
+            <div class="info-box">
+                山札:
+                <span id="deckCount">0</span>
+            </div>
+
+            <div class="info-box">
+                場:
+                <span id="discardCount">0</span>
+            </div>
+
+            <div class="info-box">
+                エグゾディア:
+                <span id="exodiaCount">0 / 5</span>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="cpu-player left">
+
+        <div class="cpu-box">
+
+            <div class="player-name">
+                CPU 1
+                <span id="cpu1Count">7</span>枚
+            </div>
+
+            <div
+                id="cpu1Hand"
+                class="cpu-hand vertical">
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="cpu-top">
+
+        <div class="cpu-box">
+
+            <div class="player-name">
+                CPU 2
+                <span id="cpu2Count">7</span>枚
+            </div>
+
+            <div
+                id="cpu2Hand"
+                class="cpu-hand">
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="cpu-player right">
+
+        <div class="cpu-box">
+
+            <div class="player-name">
+                CPU 3
+                <span id="cpu3Count">7</span>枚
+            </div>
+
+            <div
+                id="cpu3Hand"
+                class="cpu-hand vertical">
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="center">
+
+        <div id="turnDirectionRing" class="hidden" aria-label="進行方向"></div>
+
+        <div class="zone">
+
+            <div class="zone-label">
+                山札
+            </div>
+
+            <div
+                id="deckCard"
+                class="card back">
+            </div>
+
+        </div>
+
+        <div class="zone">
+
+            <div class="zone-label">
+                場
+                <span id="currentColorText"></span>
+            </div>
+
+            <div id="discardCard"></div>
+
+        </div>
+
+    </div>
+
+    <div id="message" class="message" aria-label="行動ログ・チャット">
+        <div class="message-header">
+            <div class="message-tabs" role="tablist" aria-label="行動ログとチャット">
+                <button id="messageLogTab" class="message-tab active" type="button" role="tab" aria-selected="true">行動ログ</button>
+                <button id="messageChatTab" class="message-tab online-only-chat" type="button" role="tab" aria-selected="false">チャット</button>
+            </div>
+            <div class="message-size-controls" aria-label="行動ログ・チャットのサイズ変更">
+                <button class="message-size-button" id="messageSmallButton" type="button" title="小さくする">小</button>
+                <button class="message-size-button" id="messageNormalButton" type="button" title="標準サイズ">標</button>
+                <button class="message-size-button" id="messageLargeButton" type="button" title="大きくする">大</button>
+            </div>
+        </div>
+        <div id="messageHistory" class="message-history" aria-live="polite"></div>
+        <div id="chatPanel" class="chat-panel" hidden>
+            <div id="chatHistory" class="chat-history" aria-live="polite" aria-label="チャット履歴"></div>
+            <form id="chatForm" class="chat-form" autocomplete="off">
+                <input id="chatInput" class="chat-input" type="text" maxlength="100" placeholder="メッセージを入力…" aria-label="チャットメッセージ" onkeydown="if(event.key==='Enter'){event.preventDefault();sendOnlineChat();}">
+                <button id="chatSendButton" class="chat-send-button" type="button" onclick="sendOnlineChat();">送信</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="controls">
+
+        <button id="drawButton">
+            カードを引く
+        </button>
+        <button id="restartButton">
+            リスタート
+        </button>
+
+    </div>
+
+    <div class="player-area">
+
+        <div class="player-label">
+            <span id="playerIcon" class="player-icon">🐰</span>
+            <span id="playerNameLabel">あなた</span>　
+            <span id="playerCount">7</span>枚
+        </div>
+
+        <div
+            id="playerHand"
+            class="player-hand">
+        </div>
+
+    </div>
+
+</div>
+
+<div
+    id="unoBadge"
+    class="uno-badge hidden">
+    UNO!
+</div>
+
+<div
+    id="menuOverlay"
+    class="overlay">
+
+    <div class="menu-box">
+        <div class="menu-title-wrap">
+            <span class="title-card-fan"></span>
+            <span class="title-card-fan"></span>
+            <span class="title-card-fan"></span>
+            <span class="title-card-fan"></span>
+            <span class="title-card-fan"></span>
+            <span class="title-card-fan"></span>
+            <span class="title-card-fan"></span>
+            <h1 class="menu-title">うのもどき</h1>
+        </div>
+        <div class="menu-subtitle">EXODIA EDITION</div>
+        <button id="menuStartButton" class="menu-start">メニューへ</button>
+    </div>
+
+</div>
+
+<div id="mainMenuOverlay" class="overlay hidden">
+    <div class="menu-box">
+        <h1 class="settings-title">モード選択</h1>
+        <div class="menu-main-buttons">
+            <button id="mainGameStartButton" class="menu-main-btn">CPU対戦</button>
+            <button id="onlineButton" class="menu-main-btn online-primary">オンライン対戦</button>
+            <button id="settingsButton" class="menu-main-btn menu-secondary">設定</button>
+            <button id="howToButton" class="menu-main-btn menu-secondary">遊び方</button>
+            <button id="returnToTitleButton" class="menu-main-btn menu-back">タイトルに戻る</button>
+        </div>
+    </div>
+</div>
+
+<div id="howToOverlay" class="overlay hidden">
+    <div class="menu-box howto-box">
+        <h1 class="settings-title howto-title">うのもどきの遊び方</h1>
+
+        <div class="howto-section">
+            <h3>基本ルール</h3>
+            <ul class="howto-list">
+                <li>自分の手札をすべてなくすことを目指します。</li>
+                <li>場札と同じ色、または同じ数字・記号のカードを出せます。</li>
+                <li>出せるカードがない場合は「カードを引く」で、出せるカードが出るまで引きます。</li>
+                <li>残り1枚になったらUNOを宣言する代わりに、ゲーム内の通常の手札処理に従います。</li>
+                <li>EXODIAの5枚をすべて集めると、通常の勝利条件とは別にEXODIA勝利になります。</li>
+            </ul>
+        </div>
+
+        <div class="howto-section">
+            <h3>通常カード</h3>
+            <div class="howto-card"><strong>数字カード 0〜9</strong><span>同じ色、または同じ数字のカードです。</span></div>
+            <div class="howto-card"><strong>スキップ</strong><span>次のプレイヤーをスキップします。</span></div>
+            <div class="howto-card"><strong>リバース</strong><span>プレイする順番を反転します。</span></div>
+            <div class="howto-card"><strong>ドロー2</strong><span>累積ドローに2枚を追加します。</span></div>
+            <div class="howto-card"><strong>ドロー4</strong><span>累積ドローに4枚を追加し、色を選びます。</span></div>
+            <div class="howto-card"><strong>ドロー10</strong><span>累積ドローに10枚を追加します。</span></div>
+            <div class="howto-card"><strong>WILD</strong><span>好きな色を選びます。</span></div>
+        </div>
+
+        <div class="howto-section">
+            <h3>特殊カード</h3>
+            <div class="howto-card"><strong>臣民の権利</strong><span>自分以外の全プレイヤーが2枚ドローします。</span></div>
+            <div class="howto-card"><strong>王の景色</strong><span>好きな相手1人を対象に、2枚ドローさせます。</span></div>
+            <div class="howto-card"><strong>最下層の権利</strong><span>自分以外で一番手札が少ないプレイヤーに2枚ドローさせます。このドローはカウンターできません。</span></div>
+            <div class="howto-card"><strong>最上位の権利</strong><span>自分以外で一番手札が多いプレイヤーに2枚ドローさせます。このドローはカウンターできません。</span></div>
+            <div class="howto-card"><strong>ドンマイGG</strong><span>出したプレイヤーが指定したプレイヤーに5枚ドローさせます。エフェクトは「ドンマイGG」です。</span></div>
+            <div class="howto-card"><strong>ラッキー</strong><span>出したラッキーと同じ色の手札から、好きなカードを2枚選んで捨てます。</span></div>
+            <div class="howto-card"><strong>カウンター</strong><span>自分に来た対象効果や累積ドローに対して使用できます。累積ドローでは、ドロー系カードを重ねることもできます。</span></div>
+            <div class="howto-card"><strong>EXODIA</strong><span>5種類すべてを手札に集めるとEXODIA勝利です。</span></div>
+        </div>
+
+        <div class="howto-section">
+            <h3>累積ドローとカウンター</h3>
+            <p>ドロー2・ドロー4・ドロー10が出されると、ドロー枚数が累積します。次のプレイヤーは、出せるドロー系カードやカウンターがあれば対応できます。</p>
+            <p>カウンターを使用すると、累積ドローへの対応や対象効果の反転・キャンセルができます。</p>
+            <p class="howto-note">※実際のゲーム中のカード効果・処理がこの説明と異なる場合は、ゲーム本体の処理が優先されます。</p>
+        </div>
+
+        <button id="howToBackButton" class="menu-main-btn menu-back">メニューに戻る</button>
+    </div>
+</div>
+
+<div id="settingsOverlay" class="overlay hidden">
+    <div class="menu-box settings-box">
+        <h1 class="settings-title">設定</h1>
+        <div class="settings-row"><span>自分の名前</span><input id="playerNameInput" class="settings-input" maxlength="12" placeholder="あなた"></div>
+        <div class="settings-row"><span>自分のアイコン</span><div id="playerIconOptions" class="icon-options"></div></div>
+        <div class="settings-row"><span>CPU人数</span><select id="cpuCountSelect" class="settings-select"><option value="1">1人</option><option value="2">2人</option><option value="3" selected>3人</option></select></div>
+        <div class="settings-row"><span>ゲームルール</span><span>UNO / EXODIA</span></div>
+        <button id="settingsBackButton" class="menu-main-btn menu-back">メニューに戻る</button>
+    </div>
+</div>
+
+<div id="onlineOverlay" class="overlay hidden">
+    <div class="menu-box online-box">
+        <h1 class="settings-title">オンライン対戦</h1>
+        <div id="onlineStatus" class="online-status">部屋を作るか、ルームコードで参加してください。</div>
+        <div id="onlineHomePanel">
+            <input id="onlineNameInput" class="online-input" maxlength="12" placeholder="プレイヤー名" value="プレイヤー">
+            <div class="online-actions">
+                <button id="onlineHostButton" class="menu-main-btn online-primary">部屋を作る</button>
+                <button id="onlineJoinButton" class="menu-main-btn">部屋に参加</button>
+            </div>
+            <div class="online-actions">
+                <input id="onlineRoomInput" class="online-input" maxlength="8" placeholder="ルームコード">
+            </div>
+        </div>
+        <div id="onlineRoomPanel" class="hidden">
+            <div class="online-small">ルームコード</div>
+            <div id="onlineRoomCode" class="online-code">--------</div>
+            <div id="onlineRoleText" class="online-small"></div>
+            <ul id="onlinePlayerList" class="online-list"></ul>
+            <div id="onlineWaitingChat" class="online-waiting-chat">
+                <div class="online-waiting-chat-title">待機中チャット</div>
+                <div id="onlineWaitingChatHistory" class="online-waiting-chat-history" aria-live="polite"></div>
+                <form id="onlineWaitingChatForm" class="online-waiting-chat-form" autocomplete="off">
+                    <input id="onlineWaitingChatInput" class="online-waiting-chat-input" type="text" maxlength="100" placeholder="メッセージを入力…" aria-label="待機中チャットメッセージ">
+                    <button id="onlineWaitingChatSend" class="online-waiting-chat-send" type="submit">送信</button>
+                </form>
+            </div>
+            <div class="online-actions">
+                <button id="onlineStartButton" class="menu-main-btn online-primary">ゲーム開始</button>
+                <button id="onlineLeaveButton" class="menu-main-btn online-danger">退出</button>
+            </div>
+        </div>
+        <button id="onlineBackButton" class="menu-main-btn menu-back">メニューに戻る</button>
+    </div>
+</div>
+
+<div id="onlineBadge">ONLINE</div>
+
+<div
+    id="rouletteOverlay"
+    class="overlay">
+
+    <div class="modal">
+
+        <h1>
+            🎰 最初のプレイヤー
+        </h1>
+
+        <div
+            id="rouletteName"
+            class="roulette-name">
+            ?
+        </div>
+
+        <p>
+            参加プレイヤーの中からルーレットで決定します
+        </p>
+
+        <button
+            id="rouletteStart"
+            class="start-button">
+            ルーレット開始
+        </button>
+
+    </div>
+
+</div>
+
+<div
+    id="colorOverlay"
+    class="overlay hidden">
+
+    <div class="modal">
+
+        <h2>
+            色を選択
+        </h2>
+
+        <div class="color-buttons">
+
+            <button
+                class="color-button red"
+                data-color="red">
+                🔴 赤
+            </button>
+
+            <button
+                class="color-button yellow"
+                data-color="yellow">
+                🟡 黄
+            </button>
+
+            <button
+                class="color-button green"
+                data-color="green">
+                🟢 緑
+            </button>
+
+            <button
+                class="color-button blue"
+                data-color="blue">
+                🔵 青
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div
+    id="targetOverlay"
+    class="overlay hidden">
+
+    <div class="modal">
+
+        <h2>
+            王の景色
+        </h2>
+
+        <p>
+            ドロー2する相手を選択してください
+        </p>
+
+        <div id="targetButtons" class="target-buttons"></div>
+
+    </div>
+
+</div>
+
+<div id="counterChoiceOverlay" class="overlay hidden">
+    <div class="modal">
+        <h2>累積ドロー</h2>
+        <p id="counterChoiceText">累積ドローをどうしますか？</p>
+        <div class="target-buttons">
+            <button id="counterStackButton" class="target-button">カウンターして出す</button>
+            <button id="counterDrawButton" class="target-button">累積枚数分をドローする</button>
+        </div>
+    </div>
+</div>
+
+<div id="luckyChoiceOverlay" class="overlay hidden">
+    <div class="modal">
+        <h2>ラッキー</h2>
+        <p id="luckyChoiceText">同じ色のカードを2枚選択してください。</p>
+        <div id="luckyChoiceButtons" class="target-buttons"></div>
+        <button id="luckyConfirmButton" class="target-button" disabled>2枚を捨てる</button>
+    </div>
+</div>
+
+<div id="targetCounterOverlay" class="overlay hidden">
+    <div class="modal">
+        <h2>カウンター</h2>
+        <p id="targetCounterText">対象効果をどうしますか？</p>
+        <p id="targetCounterTimer" style="font-size:28px;font-weight:1000;color:#ffe45c;">5</p>
+        <div class="target-buttons">
+            <button id="targetCounterButton" class="target-button">カウンターカードを出す</button>
+            <button id="targetCounterAcceptButton" class="target-button">そのまま受ける</button>
+        </div>
+    </div>
+</div>
+
+<div id="targetCounterResolveOverlay" class="overlay hidden">
+    <div class="modal">
+        <h2>カウンター効果</h2>
+        <p>効果をどうしますか？</p>
+        <div class="target-buttons">
+            <button id="targetCounterReverseButton" class="target-button">リバース（Aへ反転）</button>
+            <button id="targetCounterCancelButton" class="target-button">キャンセル</button>
+        </div>
+    </div>
+</div>
+
+<div
+    id="winOverlay"
+    class="overlay hidden">
+
+    <div
+        id="winBox"
+        class="win-box">
+
+        <div
+            id="winTitle"
+            class="win-title">
+            YOU WIN!
+        </div>
+
+        <p id="winMessage"></p>
+
+        <button id="winRestart">
+            もう一度遊ぶ
+        </button>
+
+    </div>
+
+</div>
+
+<div id="effectLayer"></div>
+
+<script>
+
+const COLORS = [
+    "red",
+    "yellow",
+    "green",
+    "blue"
+];
+
+const COLOR_NAMES = {
+    red:"赤",
+    yellow:"黄",
+    green:"緑",
+    blue:"青"
+};
+
+const EXODIA_PARTS = [
+
+    {
+        id:"left_arm",
+        name:"封印されし左腕",
+        symbol:"🦾"
+    },
+
+    {
+        id:"right_arm",
+        name:"封印されし右腕",
+        symbol:"🦾"
+    },
+
+    {
+        id:"left_leg",
+        name:"封印されし左脚",
+        symbol:"🦵"
+    },
+
+    {
+        id:"right_leg",
+        name:"封印されし右脚",
+        symbol:"🦵"
+    },
+
+    {
+        id:"head",
+        name:"封印されしエクゾディア",
+        symbol:"👑"
+    }
+
+];
+
+let cpuCount = 3;
+
+const players = [
+
+    {
+        id:0,
+        name:"あなた",
+        icon:"🐰",
+        type:"human",
+        hand:[],
+        finished:false
+    },
+
+    {
+        id:1,
+        name:"CPU 1",
+        icon:"🤖",
+        type:"cpu",
+        hand:[],
+        finished:false
+    },
+
+    {
+        id:2,
+        name:"CPU 2",
+        icon:"🤖",
+        type:"cpu",
+        hand:[],
+        finished:false
+    },
+
+    {
+        id:3,
+        name:"CPU 3",
+        icon:"🤖",
+        type:"cpu",
+        hand:[],
+        finished:false
+    }
+
+];
+
+let deck = [];
+
+let discardPile = [];
+
+let currentPlayer = 0;
+
+let direction = 1;
+
+let currentColor = null;
+
+let pendingDraw = 0;
+
+/* カウンター対象となる直前のドロー枚数 */
+let pendingDrawLastAmount = 0;
+
+let pendingDrawSource = null;
+let awaitingCounterChoice = false;
+
+/* 対象効果カウンター：AがBへ発動した効果を、Bが5秒以内に反転/キャンセルできる */
+let pendingTargetEffect = null;
+let targetCounterIntervalId = null;
+let targetCounterResolveTimer = null;
+
+let gameStarted = false;
+
+let gameOver = false;
+
+let awaitingColor = false;
+let awaitingTarget = false;
+let targetPlayerIndex = null;
+let targetCardPlayerIndex = null;
+
+let rouletteRunning = false;
+
+let playerSaidUno = false;
+
+let unoPenaltyApplied = false;
+
+let unoProcessing = false;
+
+let exodiaReturnCard = null;
+
+let cpuProcessing = false;
+
+/* CPUの行動を人が目で追える速度にするための待ち時間 */
+const CPU_ACTION_DELAY = 1200;
+
+let cpuTimer = null;
+
+/* オンライン対戦 */
+let onlineMode = false;
+let onlineIsHost = false;
+let onlinePeer = null;
+let onlineConnections = {};
+let onlinePlayerSlot = 0;
+let onlinePlayerCount = 1;
+let onlineRoomCode = "";
+let onlineName = "プレイヤー";
+let onlineReady = false;
+let onlineColorMode = null;
+let onlineStarting = false;
+
+
+
+/*
+ * 役カード上がりペナルティ
+ *
+ * 最後に出したカードが役カードなら
+ * 2枚引いてゲーム続行。
+ */
+const PENALTY_DRAW_COUNT = 2;
+
+
+/*
+ * 役カード判定
+ *
+ * 対象:
+ * SKIP
+ * REVERSE
+ * DRAW2
+ * WILD
+ * DRAW4
+ *
+ * エグゾディアは対象外。
+ */
+function isActionCard(card){
+
+    if(!card){
+        return false;
+    }
+
+    return [
+        "skip",
+        "reverse",
+        "draw2",
+        "draw10",
+        "counter",
+        "rights",
+        "kingView",
+        "lowestRight",
+        "lucky",
+        "wild",
+        "draw4"
+    ].includes(card.type);
+}
+
+
+const playerHandEl =
+    document.getElementById("playerHand");
+
+const cpuHands = [
+
+    document.getElementById("cpu1Hand"),
+
+    document.getElementById("cpu2Hand"),
+
+    document.getElementById("cpu3Hand")
+
+];
+
+const cpuCounts = [
+
+    document.getElementById("cpu1Count"),
+
+    document.getElementById("cpu2Count"),
+
+    document.getElementById("cpu3Count")
+
+];
+
+const playerCountEl =
+    document.getElementById("playerCount");
+
+const discardCardEl =
+    document.getElementById("discardCard");
+
+const deckCardEl =
+    document.getElementById("deckCard");
+
+const deckCountEl =
+    document.getElementById("deckCount");
+
+const discardCountEl =
+    document.getElementById("discardCount");
+
+const turnTextEl =
+    document.getElementById("turnText");
+
+const currentColorTextEl =
+    document.getElementById("currentColorText");
+
+const exodiaCountEl =
+    document.getElementById("exodiaCount");
+
+const messageEl =
+    document.getElementById("messageHistory");
+
+const messageBox =
+    document.getElementById("message");
+
+const messageHistory =
+    document.getElementById("messageHistory");
+
+const messageSmallButton =
+    document.getElementById("messageSmallButton");
+
+const messageNormalButton =
+    document.getElementById("messageNormalButton");
+
+const messageLargeButton =
+    document.getElementById("messageLargeButton");
+
+const messageLogTab =
+    document.getElementById("messageLogTab");
+
+const messageChatTab =
+    document.getElementById("messageChatTab");
+
+const chatPanel =
+    document.getElementById("chatPanel");
+
+const chatHistory =
+    document.getElementById("chatHistory");
+
+const chatForm =
+    document.getElementById("chatForm");
+
+const chatInput =
+    document.getElementById("chatInput");
+
+const onlineWaitingChatHistory =
+    document.getElementById("onlineWaitingChatHistory");
+
+const onlineWaitingChatForm =
+    document.getElementById("onlineWaitingChatForm");
+
+const onlineWaitingChatInput =
+    document.getElementById("onlineWaitingChatInput");
+
+function addOnlineWaitingChatMessage(name, text, senderSlot = null){
+    if(!onlineWaitingChatHistory) return;
+    const cleanText = String(text ?? "").trim();
+    if(!cleanText) return;
+    const row = document.createElement("div");
+    row.className = "online-waiting-chat-message";
+    if(senderSlot !== null && Number(senderSlot) === Number(onlinePlayerSlot)) row.classList.add("self");
+    const nameEl = document.createElement("span");
+    nameEl.className = "online-waiting-chat-name";
+    nameEl.textContent = String(name || "プレイヤー").slice(0,12);
+    const textEl = document.createElement("span");
+    textEl.textContent = cleanText.slice(0,100);
+    row.append(nameEl, textEl);
+    onlineWaitingChatHistory.appendChild(row);
+    while(onlineWaitingChatHistory.children.length > 100) onlineWaitingChatHistory.firstElementChild.remove();
+    onlineWaitingChatHistory.scrollTop = onlineWaitingChatHistory.scrollHeight;
+}
+
+function sendOnlineWaitingChat(){
+    if(!onlineWaitingChatInput) return;
+    const text = onlineWaitingChatInput.value.trim().slice(0,100);
+    if(!text || !onlineMode) return;
+    const localSlot = Number.isInteger(onlinePlayerSlot) ? onlinePlayerSlot : 0;
+    const name = (players[localSlot]?.name || onlineName || playerProfile.name || "プレイヤー").slice(0,12);
+    if(onlineIsHost){
+        const msg = {type:"chat", slot:localSlot, name, text};
+        addOnlineWaitingChatMessage(name, text, localSlot);
+        addChatMessage(name, text, localSlot);
+        onlineBroadcast(msg);
+    }else{
+        const conn = onlineConnections.host;
+        if(!conn || !conn.open){
+            onlineSetStatus("ホストとの通信が切れているため、チャットを送信できません。");
+            return;
+        }
+        // 送信した本人には即時表示する。ホスト側では本人への再送を行わない。
+        addOnlineWaitingChatMessage(name, text, localSlot);
+        addChatMessage(name, text, localSlot);
+        if(!onlineSend(conn, {type:"chat", text})){
+            onlineSetStatus("ホストとの通信が切れているため、チャットを送信できません。");
+            return;
+        }
+    }
+    onlineWaitingChatInput.value = "";
+    onlineWaitingChatInput.focus();
+}
+
+let messageActiveTab = "log";
+
+function setMessageTab(tab){
+    messageActiveTab = tab === "chat" ? "chat" : "log";
+    const isChat = messageActiveTab === "chat";
+    messageLogTab?.classList.toggle("active", !isChat);
+    messageChatTab?.classList.toggle("active", isChat);
+    messageLogTab?.setAttribute("aria-selected", String(!isChat));
+    messageChatTab?.setAttribute("aria-selected", String(isChat));
+    messageBox?.classList.toggle("chat-mode", isChat);
+    if(messageHistory) messageHistory.style.display = isChat ? "none" : "";
+    if(chatPanel){
+        chatPanel.hidden = !isChat;
+        chatPanel.style.display = isChat ? "flex" : "none";
+    }
+    if(messageActiveTab === "chat") chatInput?.focus();
+}
+
+function updateOnlineChatVisibility(){
+    // 動作確認のためCPU対戦でもチャットタブを表示する。
+    const show = true;
+    messageBox?.classList.add("online-enabled");
+    if(messageChatTab){
+        messageChatTab.hidden = false;
+        messageChatTab.style.display = "inline-flex";
+    }
+}
+
+function clearChatHistory(){
+    if(chatHistory) chatHistory.innerHTML = "";
+}
+
+function addChatMessage(name, text, senderSlot = null){
+    if(!chatHistory) return;
+    const cleanText = String(text ?? "").trim();
+    if(!cleanText) return;
+
+    const bubble = document.createElement("div");
+    bubble.className = "chat-bubble";
+    if(senderSlot !== null && Number(senderSlot) === Number(onlinePlayerSlot)) bubble.classList.add("self");
+
+    const nameEl = document.createElement("span");
+    nameEl.className = "chat-name";
+    nameEl.textContent = String(name || "プレイヤー").slice(0,12);
+
+    const textEl = document.createElement("span");
+    textEl.className = "chat-text";
+    textEl.textContent = cleanText.slice(0,100);
+
+    bubble.append(nameEl, textEl);
+    chatHistory.appendChild(bubble);
+    while(chatHistory.children.length > 100) chatHistory.firstElementChild.remove();
+    chatHistory.scrollTop = chatHistory.scrollHeight;
+}
+
+function sendOnlineChat(){
+    const input = document.getElementById("chatInput");
+    if(!input) return;
+    const text = String(input.value || "").trim().slice(0,100);
+    if(!text) return;
+    const localSlot = Number.isInteger(onlinePlayerSlot) ? onlinePlayerSlot : 0;
+    const name = (players[localSlot]?.name || onlineName || playerProfile.name || "プレイヤー").slice(0,12);
+
+    // CPU対戦では通信処理を一切通さず、その場でチャット欄へ追加する。
+    if(!onlineMode){
+        addChatMessage(name, text, localSlot);
+        input.value = "";
+        input.focus();
+        return;
+    }
+
+    if(onlineIsHost){
+        const msg = {type:"chat", slot:onlinePlayerSlot, name, text};
+        addChatMessage(name, text, onlinePlayerSlot);
+        onlineBroadcast(msg);
+    }else{
+        const conn = onlineConnections.host;
+        if(!conn || !conn.open){
+            onlineSetStatus("ホストとの通信が切れているため、チャットを送信できません。");
+            return;
+        }
+        // 送信した本人には即時表示する。ホスト側では本人への再送を行わない。
+        addChatMessage(name, text, localSlot);
+        addOnlineWaitingChatMessage(name, text, localSlot);
+        if(!onlineSend(conn, {type:"chat", text})){
+            onlineSetStatus("ホストとの通信が切れているため、チャットを送信できません。");
+            return;
+        }
+    }
+    chatInput.value = "";
+    chatInput.focus();
+}
+
+function setMessageSize(size){
+    if(!messageBox){
+        return;
+    }
+
+    messageBox.classList.remove("small", "large");
+
+    if(size === "small"){
+        messageBox.classList.add("small");
+    }else if(size === "large"){
+        messageBox.classList.add("large");
+    }
+
+    try{
+        localStorage.setItem("unoMessageSize", size);
+    }catch(e){}
+}
+
+try{
+    const savedMessageSize = localStorage.getItem("unoMessageSize");
+    if(savedMessageSize === "small" || savedMessageSize === "large"){
+        setMessageSize(savedMessageSize);
+    }
+}catch(e){}
+
+messageSmallButton?.addEventListener("click", () => setMessageSize("small"));
+messageNormalButton?.addEventListener("click", () => setMessageSize("normal"));
+messageLargeButton?.addEventListener("click", () => setMessageSize("large"));
+messageLogTab?.addEventListener("click", () => setMessageTab("log"));
+messageChatTab?.addEventListener("click", () => setMessageTab("chat"));
+chatForm?.addEventListener("submit", event => {
+    event.preventDefault();
+    event.stopPropagation();
+    sendOnlineChat();
+});
+onlineWaitingChatForm?.addEventListener("submit", event => {
+    event.preventDefault();
+    sendOnlineWaitingChat();
+});
+updateOnlineChatVisibility();
+
+const unoBadge =
+    document.getElementById("unoBadge");
+
+const effectLayer =
+    document.getElementById("effectLayer");
+
+const menuOverlay =
+    document.getElementById("menuOverlay");
+
+const menuStartButton =
+    document.getElementById("menuStartButton");
+
+const cpuCountSelect =
+    document.getElementById("cpuCountSelect");
+
+const rouletteOverlay =
+    document.getElementById("rouletteOverlay");
+
+const rouletteName =
+    document.getElementById("rouletteName");
+
+const colorOverlay =
+    document.getElementById("colorOverlay");
+
+const targetOverlay =
+    document.getElementById("targetOverlay");
+
+const luckyChoiceOverlay = document.getElementById("luckyChoiceOverlay");
+const luckyChoiceText = document.getElementById("luckyChoiceText");
+const luckyChoiceButtons = document.getElementById("luckyChoiceButtons");
+const luckyConfirmButton = document.getElementById("luckyConfirmButton");
+
+let awaitingLuckyChoice = false;
+let pendingLuckyPlayerIndex = null;
+let pendingLuckyColor = null;
+let pendingLuckyCard = null;
+let luckySelectedIndices = [];
+
+const counterChoiceOverlay = document.getElementById("counterChoiceOverlay");
+const counterChoiceText = document.getElementById("counterChoiceText");
+const counterStackButton = document.getElementById("counterStackButton");
+const counterDrawButton = document.getElementById("counterDrawButton");
+
+const targetCounterOverlay = document.getElementById("targetCounterOverlay");
+const targetCounterText = document.getElementById("targetCounterText");
+const targetCounterTimer = document.getElementById("targetCounterTimer");
+const targetCounterButton = document.getElementById("targetCounterButton");
+const targetCounterAcceptButton = document.getElementById("targetCounterAcceptButton");
+const targetCounterResolveOverlay = document.getElementById("targetCounterResolveOverlay");
+const targetCounterReverseButton = document.getElementById("targetCounterReverseButton");
+const targetCounterCancelButton = document.getElementById("targetCounterCancelButton");
+
+const targetButtons =
+    document.getElementById("targetButtons");
+
+const winOverlay =
+    document.getElementById("winOverlay");
+
+const winBox =
+    document.getElementById("winBox");
+
+const winTitle =
+    document.getElementById("winTitle");
+
+const winMessage =
+    document.getElementById("winMessage");
+
+const drawButton =
+    document.getElementById("drawButton");
+
+
+const restartButton =
+    document.getElementById("restartButton");
+
+const backToMenuButton =
+    document.getElementById("backToMenuButton");
+
+
+const PLAYER_ICONS = ["🐰","😀","😎","🐱","🐶","🦊","🐼","🐸","🤖","👑","⭐","🔥"];
+let playerProfile = { name:"あなた", icon:"🐰" };
+
+function loadPlayerProfile(){
+    try{
+        const saved = JSON.parse(localStorage.getItem("unoPlayerProfile") || "null");
+        if(saved && typeof saved === "object"){
+            if(typeof saved.name === "string" && saved.name.trim()) playerProfile.name = saved.name.trim().slice(0,12);
+            if(PLAYER_ICONS.includes(saved.icon)) playerProfile.icon = saved.icon;
+        }
+    }catch(e){}
+    players[0].name = playerProfile.name;
+    players[0].icon = playerProfile.icon;
+}
+
+function savePlayerProfile(){
+    const input = document.getElementById("playerNameInput");
+    const name = (input?.value || playerProfile.name || "あなた").trim().slice(0,12) || "あなた";
+    playerProfile.name = name;
+    const selected = document.querySelector(".icon-option.selected");
+    if(selected && PLAYER_ICONS.includes(selected.dataset.icon)) playerProfile.icon = selected.dataset.icon;
+    try{ localStorage.setItem("unoPlayerProfile", JSON.stringify(playerProfile)); }catch(e){}
+    players[0].name = playerProfile.name;
+    players[0].icon = playerProfile.icon;
+    const onlineInput = document.getElementById("onlineNameInput");
+    if(onlineInput) onlineInput.value = playerProfile.name;
+    renderPlayerProfile();
+}
+
+function renderPlayerProfile(){
+    const nameEl = document.getElementById("playerNameLabel");
+    const iconEl = document.getElementById("playerIcon");
+    if(nameEl) nameEl.textContent = playerProfile.name;
+    if(iconEl) iconEl.textContent = playerProfile.icon;
+}
+
+function buildPlayerIconOptions(){
+    const box = document.getElementById("playerIconOptions");
+    if(!box) return;
+    box.innerHTML = "";
+    PLAYER_ICONS.forEach(icon=>{
+        const btn=document.createElement("button");
+        btn.type="button";
+        btn.className="icon-option" + (icon===playerProfile.icon ? " selected" : "");
+        btn.dataset.icon=icon;
+        btn.textContent=icon;
+        btn.title="アイコン " + icon;
+        btn.addEventListener("click",()=>{
+            box.querySelectorAll(".icon-option").forEach(b=>b.classList.remove("selected"));
+            btn.classList.add("selected");
+            savePlayerProfile();
+        });
+        box.appendChild(btn);
+    });
+}
+
+function createDeck(){
+
+    const cards = [];
+
+    let id = 0;
+
+    COLORS.forEach(color => {
+
+        cards.push({
+            id:id++,
+            type:"number",
+            color:color,
+            value:0
+        });
+
+        for(let value=1; value<=9; value++){
+
+            for(let i=0; i<2; i++){
+
+                cards.push({
+                    id:id++,
+                    type:"number",
+                    color:color,
+                    value:value
+                });
+
+            }
+
+        }
+
+        for(let i=0; i<2; i++){
+
+            cards.push({
+                id:id++,
+                type:"skip",
+                color:color,
+                value:"SKIP"
+            });
+
+            cards.push({
+                id:id++,
+                type:"reverse",
+                color:color,
+                value:"REVERSE"
+            });
+
+            cards.push({
+                id:id++,
+                type:"draw2",
+                color:color,
+                value:"DRAW2"
+            });
+
+            cards.push({
+                id:id++,
+                type:"draw10",
+                color:color,
+                value:"DRAW10"
+            });
+
+        }
+
+        /* ラッキー：各色1枚。出した色と同じ色の手札を2枚選んで捨てる */
+        cards.push({
+            id:id++,
+            type:"lucky",
+            color:color,
+            value:"ラッキー"
+        });
+
+    });
+
+    /* カウンター：自分にドローが来たときだけ使用でき、
+       直前にドロー系カードを出したプレイヤーへ9枚ドローさせる */
+    for(let i=0; i<4; i++){
+
+        cards.push({
+            id:id++,
+            type:"counter",
+            color:null,
+            value:"COUNTER"
+        });
+    }
+
+    /* 臣民の権利：自分以外の全プレイヤーが2枚引く */
+    for(let i=0; i<4; i++){
+
+        cards.push({
+            id:id++,
+            type:"rights",
+            color:null,
+            value:"臣民の権利"
+        });
+
+    }
+
+    /* 王の景色：好きな相手1人に2枚ドローさせる */
+    for(let i=0; i<4; i++){
+
+        cards.push({
+            id:id++,
+            type:"kingView",
+            color:null,
+            value:"王の景色"
+        });
+
+    }
+
+    /* 最下層の権利：自分以外で一番手札が少ないプレイヤーに2枚ドロー。カウンター不可 */
+    cards.push({
+        id:id++,
+        type:"lowestRight",
+        color:null,
+        value:"最下層の権利"
+    });
+
+    /* 最上位の権利：自分以外で一番手札が多いプレイヤーに2枚ドロー。カウンター不可 */
+    cards.push({
+        id:id++,
+        type:"highestRight",
+        color:null,
+        value:"最上位の権利"
+    });
+
+    /* ドンマイGG：出したプレイヤーが指定した相手に5枚ドロー */
+    cards.push({
+        id:id++,
+        type:"donmaiGG",
+        color:null,
+        value:"ドンマイGG"
+    });
+
+    for(let i=0; i<4; i++){
+
+        cards.push({
+            id:id++,
+            type:"wild",
+            color:null,
+            value:"WILD"
+        });
+
+        cards.push({
+            id:id++,
+            type:"draw4",
+            color:null,
+            value:"DRAW4"
+        });
+
+    }
+    EXODIA_PARTS.forEach(part => {
+
+        cards.push({
+            id:id++,
+            type:"exodia",
+            color:null,
+            value:part.id,
+            name:part.name,
+            symbol:part.symbol
+        });
+
+    });
+
+    return cards;
+}
+
+
+function shuffle(array){
+
+    for(let i=array.length-1; i>0; i--){
+
+        const j =
+            Math.floor(
+                Math.random() * (i+1)
+            );
+
+        [
+            array[i],
+            array[j]
+        ] =
+        [
+            array[j],
+            array[i]
+        ];
+    }
+
+    return array;
+}
+
+
+function drawFromDeck(){
+
+    if(deck.length===0){
+
+        refillDeck();
+
+    }
+
+    if(deck.length===0){
+
+        return null;
+    }
+
+    return deck.pop();
+}
+
+
+function refillDeck(){
+
+    if(discardPile.length<=1){
+        return;
+    }
+
+    const top =
+        discardPile.pop();
+
+    deck =
+        shuffle(
+            discardPile.splice(0)
+        );
+
+    discardPile.push(top);
+}
+
+
+function initializeGame(){
+
+    if(cpuTimer){
+
+        clearTimeout(cpuTimer);
+
+        cpuTimer = null;
+    }
+
+    deck =
+        shuffle(
+            createDeck()
+        );
+
+    discardPile = [];
+
+    players.forEach(player => {
+
+        player.hand = [];
+        player.finished = false;
+
+    });
+
+    currentPlayer = 0;
+
+    direction = 1;
+
+    currentColor = null;
+
+    pendingDraw = 0;
+
+    pendingDrawLastAmount = 0;
+
+    pendingDrawSource = null;
+
+    gameStarted = false;
+
+    gameOver = false;
+
+    awaitingColor = false;
+
+    rouletteRunning = false;
+
+    cpuProcessing = false;
+
+    playerSaidUno = false;
+
+    unoPenaltyApplied = false;
+
+    unoProcessing = false;
+
+    exodiaReturnCard = null;
+
+    clearMessageHistory();
+
+    for(let i=0; i<7; i++){
+
+        players.forEach((player, index) => {
+
+            const active = onlineMode ? index < onlinePlayerCount : index <= cpuCount;
+            if(!active){ return; }
+
+            const card =
+                drawFromDeck();
+
+            if(card){
+                player.hand.push(card);
+            }
+
+        });
+
+    }
+
+    const exodiaWinner =
+        findExodiaWinner();
+
+    if(exodiaWinner && exodiaWinner.type==="human"){
+
+        render();
+
+        setTimeout(() => {
+
+            exodiaVictory(
+                exodiaWinner
+            );
+
+        },100);
+
+        return;
+    }
+
+    let firstCard = null;
+
+    while(deck.length>0){
+
+        const candidate =
+            drawFromDeck();
+
+        if(!candidate){
+            break;
+        }
+
+        if(
+            candidate.type !== "wild" &&
+            candidate.type !== "draw4" &&
+            candidate.type !== "exodia"
+        ){
+
+            firstCard =
+                candidate;
+
+            break;
+        }
+
+        deck.unshift(candidate);
+    }
+
+    if(firstCard){
+
+        discardPile.push(
+            firstCard
+        );
+
+        currentColor =
+            firstCard.color;
+    }
+
+    render();
+
+    showMessage(
+        "ルーレットで最初のプレイヤーを決定します。"
+    );
+}
+
+
+function hasFullExodia(hand){
+
+    return EXODIA_PARTS.every(part => {
+
+        return hand.some(card => {
+
+            return (
+                card &&
+                card.type==="exodia" &&
+                card.value===part.id
+            );
+
+        });
+
+    });
+}
+
+
+function findExodiaWinner(){
+
+    for(const player of players){
+
+        if(hasFullExodia(player.hand)){
+
+            return player;
+
+        }
+
+    }
+
+    return null;
+}
+
+
+function checkExodia(player){
+
+    if(gameOver){
+        return true;
+    }
+
+    if(hasFullExodia(player.hand)){
+
+        exodiaVictory(player);
+
+        return true;
+    }
+
+    return false;
+}
+
+
+function exodiaVictory(player){
+
+    /* CPUがエグゾディアを完成させてもラウンドは終了しない */
+    if(player.type!=="human"){
+        return;
+    }
+
+    if(gameOver){
+        return;
+    }
+
+    gameOver = true;
+
+    gameStarted = false;
+
+    awaitingColor = false;
+
+    cpuProcessing = false;
+
+    if(cpuTimer){
+
+        clearTimeout(cpuTimer);
+
+        cpuTimer = null;
+    }
+
+    /*
+     * 人間プレイヤーがエグゾディア5枚を完成させた場合は、
+     * CPU対戦・オンライン対戦を問わずEXODIA勝利を優先する。
+     */
+
+    colorOverlay
+        .classList
+        .add("hidden");
+
+    showEffect(
+        "EXODIA!",
+        "#ffd43b"
+    );
+
+    shakeScreen();
+
+    for(let i=0; i<90; i++){
+
+        const particle =
+            document.createElement("div");
+
+        particle.className =
+            "exodia-particle";
+
+        particle.style.setProperty(
+            "--x",
+            Math.random()*100
+        );
+
+        particle.style.setProperty(
+            "--y",
+            Math.random()*100
+        );
+
+        effectLayer.appendChild(
+            particle
+        );
+
+        setTimeout(() => {
+
+            particle.remove();
+
+        },1600);
+    }
+
+    showMessage(
+        `${player.name}がエグゾディアを完成させた！`
+    );
+
+    setTimeout(() => {
+
+        winOverlay
+            .classList
+            .remove("hidden");
+
+        winBox
+            .classList
+            .add("exodia-win");
+
+        winTitle
+            .classList
+            .add("exodia-win-title");
+
+        winTitle.textContent =
+            "EXODIA WIN!";
+
+        winMessage.textContent =
+            `${player.name}がエグゾディア5枚を揃えました！`;
+
+    },700);
+
+    render();
+}
+
+
+function showCpuMatchRanking(player){
+
+    /* CPU対戦で自分が上がった場合は順位を表示して
+       モード選択画面へ戻す。順位は手札枚数の少ない順。 */
+    const ranking = players
+        .map((p, index) => ({ player:p, index, cards:Array.isArray(p.hand) ? p.hand.length : 0 }))
+        .sort((a,b) => a.cards - b.cards);
+
+    const rank = Math.max(1, ranking.findIndex(x => x.index === 0) + 1);
+
+    if(winOverlay){
+        winOverlay.classList.remove('hidden');
+        winBox.classList.remove('exodia-win');
+        winTitle.classList.remove('exodia-win-title');
+        winTitle.textContent = 'CPU対戦 結果';
+        winMessage.innerHTML =
+            `<strong style="font-size:1.45em">あなたの順位：${rank}位</strong><br><br>` +
+            ranking.map((x,i) => `${i+1}位：${x.player.name}（残り${x.cards}枚）`).join('<br>');
+    }
+
+    render();
+
+    setTimeout(() => {
+        returnToMainMenu();
+    }, 3500);
+}
+
+function normalVictory(player){
+
+    /* CPUが手札を使い切ってもラウンドは終了しない */
+    if(player.type!=="human"){
+        return;
+    }
+
+    if(gameOver){
+        return;
+    }
+
+    gameOver = true;
+
+    gameStarted = false;
+
+    if(cpuTimer){
+
+        clearTimeout(cpuTimer);
+
+        cpuTimer = null;
+    }
+
+    /* CPU対戦では自分が上がったら順位を表示してモード選択へ戻る */
+    if(!onlineMode && player.type === "human"){
+        showCpuMatchRanking(player);
+        return;
+    }
+
+    setTimeout(() => {
+
+        winOverlay
+            .classList
+            .remove("hidden");
+
+        winBox
+            .classList
+            .remove("exodia-win");
+
+        winTitle
+            .classList
+            .remove("exodia-win-title");
+
+        winTitle.textContent =
+            player.type==="human"
+                ? "YOU WIN!"
+                : "ROUND WIN!";
+
+        winMessage.textContent =
+            `${player.name}が手札をすべて使い切りました！`;
+
+    },300);
+}
+
+
+/*
+ * 役カードで上がった場合のペナルティ
+ *
+ * 通常の役カードを最後に出した場合、
+ * 勝利にはせず2枚引かせてゲーム続行。
+ */
+function actionCardFinishPenalty(player, card){
+
+    showEffect(
+        "PENALTY!",
+        "#ff3030"
+    );
+
+    shakeScreen();
+
+    showMessage(
+        `${player.name}は役カードで上がったため、ペナルティとして2枚引きます！`
+    );
+
+    for(let i=0; i<PENALTY_DRAW_COUNT; i++){
+
+        const penaltyCard =
+            drawFromDeck();
+
+        if(penaltyCard){
+
+            player.hand.push(
+                penaltyCard
+            );
+
+        }
+
+    }
+
+    /*
+     * ここでエグゾディアが完成した場合は
+     * エグゾディア勝利を優先。
+     */
+    if(hasFullExodia(player.hand)){
+
+        exodiaVictory(player);
+
+        return true;
+    }
+
+    return false;
+}
+
+
+function canPlay(card){
+
+    if(!card){
+        return false;
+    }
+
+    /* ドローを受けている間は、ドロー系カードかカウンターだけ出せる */
+    if(pendingDraw > 0 && !["draw2","draw4","draw10","counter"].includes(card.type)){
+        return false;
+    }
+
+    if(card.type==="exodia"){
+        return true;
+    }
+    if(card.type==="counter"){
+        return !!(pendingTargetEffect && pendingTargetEffect.target === currentPlayer) || pendingDraw > 0;
+    }
+
+    if(card.type==="lucky"){
+        const sameColorCount = players[currentPlayer]?.hand?.filter(c => c && c !== card && c.color === card.color).length || 0;
+        return sameColorCount >= 2;
+    }
+
+    if(
+        card.type==="wild" ||
+        card.type==="draw4" ||
+        card.type==="rights" ||
+        card.type==="kingView" ||
+        card.type==="donmaiGG" ||
+        card.type==="lowestRight" ||
+        card.type==="highestRight"
+    ){
+
+        return true;
+    }
+
+    const top =
+        getTopCard();
+
+    if(!top){
+        return true;
+    }
+
+    if(card.color===currentColor){
+        return true;
+    }
+
+    if(
+        card.type===top.type &&
+        card.value===top.value
+    ){
+
+        return true;
+    }
+
+    return false;
+}
+
+
+function getTopCard(){
+
+    if(discardPile.length===0){
+        return null;
+    }
+
+    return discardPile[
+        discardPile.length-1
+    ];
+}
+
+
+function getActiveTargetPlayers(sourceIndex){
+
+    const count =
+        onlineMode ? onlinePlayerCount : cpuCount + 1;
+
+    const result = [];
+
+    for(let i=0; i<count; i++){
+
+        if(i===sourceIndex){
+            continue;
+        }
+
+        if(!players[i] || players[i].finished){
+            continue;
+        }
+
+        result.push(i);
+    }
+
+    return result;
+}
+
+
+function drawCardsForTarget(targetIndex, amount=2){
+
+    const target = players[targetIndex];
+
+    if(!target || target.finished){
+        return 0;
+    }
+
+    let drawnCount = 0;
+
+    for(let i=0; i<amount; i++){
+
+        const drawn = drawFromDeck();
+
+        if(!drawn){
+            break;
+        }
+
+        target.hand.push(drawn);
+        drawnCount++;
+    }
+
+    return drawnCount;
+}
+
+
+function showTargetSelection(sourceIndex){
+
+    const targets = getActiveTargetPlayers(sourceIndex);
+
+    if(targets.length===0){
+        return false;
+    }
+
+    targetCardPlayerIndex = sourceIndex;
+    targetPlayerIndex = null;
+    awaitingTarget = true;
+
+    targetButtons.innerHTML = "";
+
+    targets.forEach(index => {
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "target-button";
+        button.textContent = `${players[index].name}（${players[index].hand.length}枚）`;
+
+        button.addEventListener("click", () => {
+
+            if(onlineMode && !onlineIsHost){
+
+                onlineSend(
+                    onlineConnections.host,
+                    {type:"action", action:"target", target:index}
+                );
+
+                return;
+            }
+
+            selectTarget(index, sourceIndex);
+        });
+
+        targetButtons.appendChild(button);
+    });
+
+    targetOverlay.classList.remove("hidden");
+
+    return true;
+}
+
+
+function selectTarget(index, sourceIndex=targetCardPlayerIndex){
+
+    if(!awaitingTarget){
+        return;
+    }
+
+    const validTargets = getActiveTargetPlayers(sourceIndex);
+
+    if(!validTargets.includes(index)){
+        return;
+    }
+
+    const target = players[index];
+    const source = players[sourceIndex];
+
+    targetPlayerIndex = index;
+    awaitingTarget = false;
+    targetCardPlayerIndex = null;
+
+    targetOverlay.classList.add("hidden");
+
+    showEffect("王の景色！", "#ffd54a");
+    showMessage(`${source.name}が${target.name}を対象に王の景色を発動！`);
+    shakeScreen();
+
+    /* 王の景色を最後の1枚として出した場合は、
+       既存の役カード上がりペナルティを適用する。 */
+    if(source.hand.length===0){
+
+        const top = getTopCard();
+
+        if(top && isActionCard(top)){
+
+            const ended =
+                actionCardFinishPenalty(source,top);
+
+            if(ended){
+                render();
+                if(onlineMode && onlineIsHost){
+                    onlineBroadcastState();
+                }
+                return;
+            }
+        }
+    }
+
+    /* 対象が確定したら、対象プレイヤーに5秒のカウンター待ちを与える */
+    beginTargetEffect(sourceIndex, index, "kingView");
+
+    if(onlineMode && onlineIsHost){
+        onlineBroadcastState();
+    }
+}
+
+
+function chooseCpuTarget(cpuIndex){
+
+    const targets = getActiveTargetPlayers(cpuIndex);
+
+    if(targets.length===0){
+        return null;
+    }
+
+    /* CPUは手札が最も多い相手を優先して選ぶ */
+    targets.sort((a,b) => players[b].hand.length - players[a].hand.length);
+
+    return targets[0];
+}
+
+
+
+function clearTargetCounterTimers(){
+    if(targetCounterIntervalId){
+        clearInterval(targetCounterIntervalId);
+        targetCounterIntervalId=null;
+    }
+    if(targetCounterResolveTimer){
+        clearTimeout(targetCounterResolveTimer);
+        targetCounterResolveTimer=null;
+    }
+}
+
+function hideTargetCounterOverlays(){
+    clearTargetCounterTimers();
+    if(targetCounterOverlay) targetCounterOverlay.classList.add("hidden");
+    if(targetCounterResolveOverlay) targetCounterResolveOverlay.classList.add("hidden");
+}
+
+function getNextPlayerIndex(fromIndex){
+    const count = onlineMode ? onlinePlayerCount : cpuCount + 1;
+    let index = fromIndex;
+    for(let i=0;i<count;i++){
+        index = (index + direction + count) % count;
+        if(!players[index].finished) return index;
+    }
+    return index;
+}
+
+function beginTargetEffect(sourceIndex, targetIndex, effectType){
+    pendingTargetEffect = {
+        source: sourceIndex,
+        target: targetIndex,
+        type: effectType,
+        amount: effectType === "kingView" ? 2 : (effectType === "donmaiGG" ? 5 : 0)
+    };
+    currentPlayer = targetIndex;
+    render();
+    startCurrentTurn();
+}
+
+function applyTargetEffectTo(targetIndex){
+    const effect = pendingTargetEffect;
+    if(!effect) return;
+    const target = players[targetIndex];
+    if(!target || target.finished) return;
+
+    if(effect.type === "kingView"){
+        const amount = drawCardsForTarget(targetIndex, 2);
+        showEffect(`+${amount}`, "#ffd54a");
+        showMessage(`${players[effect.source].name}の王の景色が${target.name}に命中！${amount}枚ドロー。`);
+        shakeScreen();
+    }else if(effect.type === "donmaiGG"){
+        const amount = drawCardsForTarget(targetIndex, 5);
+        showEffect("ドンマイGG", "#ff6b6b");
+        showMessage(`${players[effect.source].name}の「ドンマイGG」！${target.name}が${amount}枚ドロー。`);
+        shakeScreen();
+    }else if(effect.type === "skip"){
+        showEffect("SKIP!", "#ff5252");
+        showMessage(`${target.name}がスキップされました。`);
+    }
+}
+
+function finishTargetEffect(mode){
+    const effect = pendingTargetEffect;
+    if(!effect) return;
+    hideTargetCounterOverlays();
+
+    if(mode === "reverse"){
+        /* 効果対象をBからAへ反転 */
+        applyTargetEffectTo(effect.source);
+        pendingTargetEffect = null;
+        /* Bの入力権は消費せず、Bから通常ターンを開始 */
+        currentPlayer = effect.target;
+        resetUnoState();
+        render();
+        startCurrentTurn();
+        return;
+    }
+
+    /* キャンセル：Bには効果を与えず、そのままBの通常ターンへ */
+    pendingTargetEffect = null;
+    currentPlayer = effect.target;
+    resetUnoState();
+    render();
+    startCurrentTurn();
+}
+
+function resolveTargetCounter(playerIndex=null){
+    const effect = pendingTargetEffect;
+    if(!effect) return;
+    const player = players[effect.target];
+    if(!player) return;
+
+    /* カウンターカードを実際に手札から消費する。
+       CPUは自動発動、プレイヤーは「カウンター」ボタンからここへ来る。 */
+    const cardIndex = player.hand.findIndex(c => c && c.type === "counter");
+    if(cardIndex < 0){
+        finishTargetEffect("cancel");
+        return;
+    }
+    const counterCard = player.hand.splice(cardIndex,1)[0];
+    discardPile.push(counterCard);
+
+    clearTargetCounterTimers();
+    targetCounterOverlay.classList.add("hidden");
+    showEffect("COUNTER!", "#d59cff");
+    showMessage(`${player.name}がカウンターカードを発動！`);
+    shakeScreen();
+    if(targetCounterResolveOverlay) targetCounterResolveOverlay.classList.remove("hidden");
+
+    if(player.type === "cpu"){
+        targetCounterResolveTimer = setTimeout(()=>{
+            targetCounterResolveTimer = null;
+            finishTargetEffect("reverse");
+        },350);
+    }
+}
+
+function showTargetCounterChoice(){
+    const effect = pendingTargetEffect;
+    if(!effect) return false;
+    const player = players[effect.target];
+    if(!player) return false;
+    const hasCounter = player.hand.some(c => c && c.type === "counter");
+
+    if(player.type === "human"){
+        /* カウンターカードを持っていない場合は、
+           カウンターUIを一切表示せず、そのまま対象効果をキャンセルする。 */
+        if(!hasCounter){
+            clearTargetCounterTimers();
+            targetCounterOverlay.classList.add("hidden");
+            if(targetCounterResolveOverlay) targetCounterResolveOverlay.classList.add("hidden");
+            finishTargetEffect("cancel");
+            return true;
+        }
+        targetCounterText.textContent = `${players[effect.source].name}から${effect.type === "skip" ? "スキップ" : "対象効果"}。カウンターしますか？`;
+        let remain=5;
+        targetCounterTimer.textContent=String(remain);
+        targetCounterOverlay.classList.remove("hidden");
+        clearTargetCounterTimers();
+        targetCounterTimer.textContent=String(remain);
+        targetCounterTimer.__remain=remain;
+        targetCounterIntervalId=setInterval(()=>{
+            remain--;
+            targetCounterTimer.textContent=String(Math.max(0,remain));
+            if(remain<=0){
+                clearTargetCounterTimers();
+                finishTargetEffect("cancel");
+            }
+        },1000);
+        
+        return true;
+    }
+
+    if(player.type === "cpu"){
+        /* CPUもカウンターカードを持っていない場合は、
+           カウンターUIを表示せず、そのまま対象効果をキャンセルする。 */
+        if(hasCounter){
+            setTimeout(()=>resolveTargetCounter(),700);
+        }else{
+            clearTargetCounterTimers();
+            targetCounterOverlay.classList.add("hidden");
+            if(targetCounterResolveOverlay) targetCounterResolveOverlay.classList.add("hidden");
+            finishTargetEffect("cancel");
+        }
+        return true;
+    }
+    return false;
+}
+
+function handlePendingTargetEffectTurn(){
+    if(!pendingTargetEffect || currentPlayer !== pendingTargetEffect.target) return false;
+    showMessage(`${players[currentPlayer].name}に対象効果のカウンター待ち（5秒）です。`);
+    return showTargetCounterChoice();
+}
+
+function findLowestHandTarget(sourceIndex){
+    const count = onlineMode ? onlinePlayerCount : cpuCount + 1;
+    const candidates = [];
+
+    for(let i=0; i<count; i++){
+        if(i === sourceIndex) continue;
+        const target = players[i];
+        if(!target || target.finished) continue;
+        candidates.push(i);
+    }
+
+    if(candidates.length === 0) return null;
+
+    // 同数なら候補配列の先頭（現在のプレイヤー順）を優先。
+    let best = candidates[0];
+    for(const i of candidates){
+        if((players[i].hand?.length || 0) < (players[best].hand?.length || 0)){
+            best = i;
+        }
+    }
+    return best;
+}
+
+function applyLowestRight(sourceIndex){
+    const source = players[sourceIndex];
+    const targetIndex = findLowestHandTarget(sourceIndex);
+    if(!source || targetIndex === null){
+        showEffect("最下層の権利！", "#ffd54a");
+        showMessage(`${source?.name || "プレイヤー"}が「最下層の権利」を使用しましたが、対象にできるプレイヤーがいません。`);
+        return null;
+    }
+
+    const target = players[targetIndex];
+    let drawnCount = 0;
+    for(let n=0; n<2; n++){
+        const drawn = drawFromDeck();
+        if(drawn){
+            target.hand.push(drawn);
+            drawnCount++;
+        }
+    }
+
+    showEffect("最下層の権利！", "#ffd54a");
+    showMessage(`${source.name}が「最下層の権利」を使用！${target.name}（手札${target.hand.length - drawnCount}枚）に${drawnCount}枚ドロー！カウンター不可。`);
+    shakeScreen();
+    return targetIndex;
+}
+
+function findHighestHandTarget(sourceIndex){
+    const count = onlineMode ? onlinePlayerCount : cpuCount + 1;
+    const candidates = [];
+
+    for(let i=0; i<count; i++){
+        if(i === sourceIndex) continue;
+        const target = players[i];
+        if(!target || target.finished) continue;
+        candidates.push(i);
+    }
+
+    if(candidates.length === 0) return null;
+
+    // 同数なら候補配列の先頭（現在のプレイヤー順）を優先。
+    let best = candidates[0];
+    for(const i of candidates){
+        if((players[i].hand?.length || 0) > (players[best].hand?.length || 0)){
+            best = i;
+        }
+    }
+    return best;
+}
+
+function applyHighestRight(sourceIndex){
+    const source = players[sourceIndex];
+    const targetIndex = findHighestHandTarget(sourceIndex);
+    if(!source || targetIndex === null){
+        showEffect("最上位の権利！", "#ffd54a");
+        showMessage(`${source?.name || "プレイヤー"}が「最上位の権利」を使用しましたが、対象にできるプレイヤーがいません。`);
+        return null;
+    }
+
+    const target = players[targetIndex];
+    const beforeCount = target.hand.length;
+    let drawnCount = 0;
+    for(let n=0; n<2; n++){
+        const drawn = drawFromDeck();
+        if(drawn){
+            target.hand.push(drawn);
+            drawnCount++;
+        }
+    }
+
+    showEffect("最上位の権利！", "#ffd54a");
+    showMessage(`${source.name}が「最上位の権利」を使用！${target.name}（手札${beforeCount}枚）に${drawnCount}枚ドロー！カウンター不可。`);
+    shakeScreen();
+    return targetIndex;
+}
+
+function playerPlay(index, playerIndex=0){
+
+    if(
+        !gameStarted ||
+        gameOver ||
+        currentPlayer!==playerIndex ||
+        awaitingColor
+    ){
+
+        return;
+    }
+
+    const player =
+        players[playerIndex];
+
+    if(!player){ return; }
+
+    const card =
+        player.hand[index];
+
+    if(!card){
+        return;
+    }
+
+    if(!canPlay(card)){
+
+        showMessage(
+            "そのカードは出せません。"
+        );
+
+        return;
+    }
+
+    /* ドロー累積へのカウンターカード */
+    if(card.type === "counter" && pendingDraw > 0){
+        counterPendingDraw(playerIndex);
+        return;
+    }
+
+    /* 対象効果へのカウンターカード */
+    if(card.type === "counter" && pendingTargetEffect && pendingTargetEffect.target === playerIndex){
+        player.hand.splice(index,1);
+        discardPile.push(card);
+        clearTargetCounterTimers();
+        targetCounterOverlay.classList.add("hidden");
+        showEffect("COUNTER!", "#d59cff");
+        showMessage(`${player.name}がカウンターカードを出しました。`);
+        shakeScreen();
+        targetCounterResolveOverlay.classList.remove("hidden");
+        render();
+        return;
+    }
+
+    player.hand.splice(
+        index,
+        1
+    );
+
+    /* プレイヤーのカード使用を行動ログへ記録 */
+    showMessage(
+        `${player.name}が「${getActionCardLogName(card)}」を出しました。`
+    );
+
+    /* カウンター後の追加ターンでカードを出したので、
+       追加ターン専用スキップ状態を解除する。 */
+
+    /*
+     * エグゾディア単体
+     */
+    if(card.type==="exodia"){
+
+        exodiaReturnCard =
+            card;
+
+        showMessage(
+            `${card.name}をワイルドとして使用！`
+        );
+
+        openColorSelection(
+            "exodia"
+        );
+
+        render();
+
+        return;
+    }
+
+    /* CPUが出したカードを場札の唯一の正本として確定してから表示する。
+       以降の効果処理より先に画面へ反映し、表示と実際の場札の順序を一致させる。 */
+    discardPile.push(card);
+    render();
+
+    if(card.color){
+
+        currentColor =
+            card.color;
+    }
+
+    if(card.type==="lucky"){
+        pendingLuckyPlayerIndex = playerIndex;
+        pendingLuckyColor = card.color;
+        pendingLuckyCard = card;
+        awaitingLuckyChoice = true;
+        luckySelectedIndices = [];
+        showEffect("LUCKY!", "#ffe45c");
+        showMessage(`${player.name}が「ラッキー」を出しました。${COLOR_NAMES[card.color]}のカードを2枚選択してください。`);
+        openLuckySelection(playerIndex);
+        render();
+        return;
+    }
+
+    if(card.type==="wild"){
+
+        /*
+         * WILDはドロー系カードの上に重ねても、
+         * ドロー効果を引き継がず「WILD単体」として機能する。
+         * そのため、累積ドローをここで解除する。
+         */
+        if(pendingDraw > 0){
+            pendingDraw = 0;
+            pendingDrawSource = null;
+        }
+
+        showEffect(
+            "WILD!",
+            "#ffffff"
+        );
+
+        openColorSelection(
+            "wild"
+        );
+
+        render();
+
+        return;
+    }
+
+    if(card.type==="draw4"){
+
+        pendingDraw += 4;
+        pendingDrawLastAmount = 4;
+        pendingDrawSource = player;
+
+        showEffect(
+            "+4!",
+            "#ff43d0"
+        );
+
+        shakeScreen();
+
+        openColorSelection(
+            "draw4"
+        );
+
+        render();
+
+        return;
+    }
+
+    if(card.type==="draw2"){
+
+        pendingDraw += 2;
+        pendingDrawLastAmount = 2;
+        pendingDrawSource = player;
+
+        showEffect(
+            "+2!",
+            "#ffb300"
+        );
+
+        shakeScreen();
+    }
+
+    if(card.type==="rights"){
+
+        /* 自分以外の参加中プレイヤー全員が2枚引く */
+        for(let i=0; i<players.length; i++){
+            const active = onlineMode ? i < onlinePlayerCount : i <= cpuCount;
+            if(!active || i===playerIndex || players[i].finished){
+                continue;
+            }
+            for(let n=0; n<2; n++){
+                const drawn = drawFromDeck();
+                if(drawn){
+                    players[i].hand.push(drawn);
+                }
+            }
+        }
+        pendingDraw = 0;
+        pendingDrawSource = null;
+
+        showEffect(
+            "臣民の権利！",
+            "#ffd54a"
+        );
+        showMessage(
+            `${player.name}が臣民の権利を使用！自分以外の全員が2枚ドロー！`
+        );
+        shakeScreen();
+    }
+
+    if(card.type==="kingView"){
+
+        pendingDraw = 0;
+        pendingDrawSource = null;
+
+        showEffect(
+            "王の景色！",
+            "#ffd54a"
+        );
+
+        if(onlineMode && onlineIsHost && playerIndex!==0){
+            /* オンライン参加者は自分の端末で対象を選ぶ */
+            targetCardPlayerIndex = playerIndex;
+            targetPlayerIndex = null;
+            awaitingTarget = true;
+            render();
+            return;
+        }
+
+        if(showTargetSelection(playerIndex)){
+
+            render();
+            return;
+        }
+    }
+
+    if(card.type==="donmaiGG"){
+
+        pendingDraw = 0;
+        pendingDrawSource = null;
+
+        showEffect(
+            "ドンマイGG",
+            "#ff6b6b"
+        );
+
+        if(onlineMode && onlineIsHost && playerIndex!==0){
+            targetCardPlayerIndex = playerIndex;
+            targetPlayerIndex = null;
+            awaitingTarget = true;
+            render();
+            return;
+        }
+
+        if(showTargetSelection(playerIndex)){
+            render();
+            return;
+        }
+    }
+
+    if(card.type==="donmaiGG"){
+
+        pendingDraw = 0;
+        pendingDrawSource = null;
+
+        const target = chooseCpuTarget(currentPlayer);
+
+        if(target!==null){
+            showEffect(`${cpu.name} ドンマイGG`, "#ff6b6b");
+            showMessage(`${cpu.name}が${players[target].name}を指定して「ドンマイGG」を発動！`);
+            shakeScreen();
+            cpuProcessing = false;
+            beginTargetEffect(currentPlayer, target, "donmaiGG");
+            return;
+        }
+    }
+
+    if(card.type==="lowestRight"){
+
+        pendingDraw = 0;
+        pendingDrawSource = null;
+        pendingTargetEffect = null;
+        applyLowestRight(playerIndex);
+
+        if(player.hand.length===0){
+            const ended = actionCardFinishPenalty(player, card);
+            if(ended){
+                render();
+                return;
+            }
+        }
+
+        nextPlayer();
+        resetUnoState();
+        render();
+        startCurrentTurn();
+        return;
+    }
+
+    if(card.type==="highestRight"){
+
+        pendingDraw = 0;
+        pendingDrawSource = null;
+        pendingTargetEffect = null;
+        applyHighestRight(playerIndex);
+
+        if(player.hand.length===0){
+            const ended = actionCardFinishPenalty(player, card);
+            if(ended){
+                render();
+                return;
+            }
+        }
+
+        nextPlayer();
+        resetUnoState();
+        render();
+        startCurrentTurn();
+        return;
+    }
+
+    if(card.type==="draw10"){
+
+        pendingDraw += 10;
+        pendingDrawLastAmount = 10;
+        pendingDrawSource = player;
+
+        showEffect(
+            "+10!",
+            "#ff4d4d"
+        );
+
+        shakeScreen();
+    }
+
+    if(card.type==="skip"){
+
+        showEffect(
+            "SKIP!",
+            "#ff5252"
+        );
+    }
+
+    if(card.type==="reverse"){
+
+        showEffect(
+            "REVERSE!",
+            "#4db8ff"
+        );
+
+        direction *= -1;
+    }
+
+    /*
+     * ★役カードで手札0枚
+     *
+     * ここで即勝利しない。
+     * 2枚引いてゲームを続行する。
+     */
+    if(player.hand.length===0){
+
+        if(isActionCard(card)){
+
+            const ended =
+                actionCardFinishPenalty(
+                    player,
+                    card
+                );
+
+            if(ended){
+
+                render();
+
+                return;
+            }
+
+            /*
+             * ペナルティで2枚増えたので
+             * 通常のターン処理へ進む。
+             */
+
+        }else{
+
+            normalVictory(player);
+
+            render();
+
+            return;
+        }
+    }
+
+    if(player.hand.length===1){
+
+        playerSaidUno = false;
+
+        unoPenaltyApplied = false;
+
+        showMessage(
+            "残り1枚！UNOを宣言してください！"
+        );
+    }
+
+    render();
+
+    if(card.type==="skip"){
+        const target = getNextPlayerIndex(playerIndex);
+        beginTargetEffect(playerIndex, target, "skip");
+        return;
+    }
+
+    nextPlayer();
+
+    resetUnoState();
+
+    render();
+
+    startCurrentTurn();
+}
+
+
+function openColorSelection(mode){
+
+    awaitingColor = true;
+
+    colorOverlay
+        .classList
+        .remove("hidden");
+
+    colorOverlay.dataset.mode =
+        mode;
+
+    render();
+}
+
+
+function selectColor(color, playerIndex=0){
+
+    if(!awaitingColor){
+        return;
+    }
+
+    const mode =
+        colorOverlay.dataset.mode;
+
+    currentColor =
+        color;
+
+    awaitingColor = false;
+
+    colorOverlay
+        .classList
+        .add("hidden");
+
+    /*
+     * エグゾディア単体使用
+     */
+    if(mode==="exodia"){
+
+        const card =
+            exodiaReturnCard;
+
+        if(card){
+
+            deck.push(card);
+
+            shuffle(deck);
+
+        }
+
+        exodiaReturnCard =
+            null;
+
+        showMessage(
+            `色は${COLOR_NAMES[color]}！エグゾディアを山札へ戻しました。`
+        );
+
+        nextPlayer();
+
+        resetUnoState();
+
+        render();
+
+        startCurrentTurn();
+
+        return;
+    }
+
+    showMessage(
+        `色は${COLOR_NAMES[color]}！`
+    );
+
+    /*
+     * +4 / WILDを最後の1枚として出した場合
+     *
+     * UNOルール上の通常勝利ではなく、
+     * ここでも役カード上がりペナルティを適用。
+     */
+    const player =
+        players[playerIndex];
+
+    if(
+        player.hand.length===0 &&
+        mode !== "exodia"
+    ){
+
+        const top =
+            getTopCard();
+
+        if(
+            top &&
+            isActionCard(top)
+        ){
+
+            const ended =
+                actionCardFinishPenalty(
+                    player,
+                    top
+                );
+
+            if(ended){
+
+                render();
+
+                return;
+            }
+        }
+    }
+
+    nextPlayer();
+
+    resetUnoState();
+
+    render();
+
+    startCurrentTurn();
+}
+
+
+function openLuckySelection(playerIndex){
+    const player = players[playerIndex];
+    if(!player || !luckyChoiceOverlay || !luckyChoiceButtons) return;
+
+    awaitingLuckyChoice = true;
+    pendingLuckyPlayerIndex = playerIndex;
+    luckySelectedIndices = [];
+    luckyChoiceButtons.innerHTML = "";
+
+    const colorName = COLOR_NAMES[pendingLuckyColor] || "";
+    luckyChoiceText.textContent = `${colorName}のカードを2枚選択してください。`;
+
+    player.hand.forEach((card, index)=>{
+        if(!card || card.color !== pendingLuckyColor) return;
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "target-button lucky-card-choice";
+        btn.textContent = getActionCardLogName(card);
+        btn.dataset.index = String(index);
+        btn.addEventListener("click",()=>{
+            const i = Number(btn.dataset.index);
+            const pos = luckySelectedIndices.indexOf(i);
+            if(pos >= 0){
+                luckySelectedIndices.splice(pos,1);
+                btn.classList.remove("selected");
+            }else if(luckySelectedIndices.length < 2){
+                luckySelectedIndices.push(i);
+                btn.classList.add("selected");
+            }
+            if(luckyConfirmButton){
+                luckyConfirmButton.disabled = luckySelectedIndices.length !== 2;
+                luckyConfirmButton.textContent = `${luckySelectedIndices.length}/2枚を選択中`;
+            }
+        });
+        luckyChoiceButtons.appendChild(btn);
+    });
+
+    if(luckyConfirmButton){
+        luckyConfirmButton.disabled = true;
+        luckyConfirmButton.textContent = "2枚を捨てる";
+    }
+    luckyChoiceOverlay.classList.remove("hidden");
+}
+
+function resolveLuckySelection(playerIndex, indices){
+    if(!awaitingLuckyChoice || pendingLuckyPlayerIndex !== playerIndex) return false;
+    const player = players[playerIndex];
+    if(!player || !Array.isArray(indices) || indices.length !== 2) return false;
+
+    const unique = [...new Set(indices.map(Number))];
+    if(unique.length !== 2) return false;
+    if(unique.some(i => !Number.isInteger(i) || i < 0 || i >= player.hand.length)) return false;
+    if(unique.some(i => player.hand[i]?.color !== pendingLuckyColor)) return false;
+
+    const luckyCard = pendingLuckyCard;
+    const chosen = unique.slice().sort((a,b)=>b-a).map(i => player.hand.splice(i,1)[0]);
+    chosen.forEach(card => { if(card) discardPile.push(card); });
+
+    awaitingLuckyChoice = false;
+    pendingLuckyPlayerIndex = null;
+    pendingLuckyColor = null;
+    pendingLuckyCard = null;
+    luckySelectedIndices = [];
+    if(luckyChoiceOverlay) luckyChoiceOverlay.classList.add("hidden");
+
+    showMessage(`${player.name}が同じ色のカードを2枚捨てました。`);
+
+    if(player.hand.length===0){
+        const ended = actionCardFinishPenalty(player, luckyCard || {type:"lucky",color:null,value:"ラッキー"});
+        if(ended){
+            render();
+            if(onlineMode && onlineIsHost) onlineBroadcastState();
+            return true;
+        }
+    }
+
+    nextPlayer();
+    resetUnoState();
+    render();
+    startCurrentTurn();
+    if(onlineMode && onlineIsHost) onlineBroadcastState();
+    return true;
+}
+
+function nextPlayer(){
+
+    const playerCount =
+        onlineMode ? onlinePlayerCount : cpuCount + 1;
+
+    currentPlayer =
+        (
+            currentPlayer +
+            direction +
+            playerCount
+        ) % playerCount;
+}
+
+
+function resetUnoState(){
+
+    /* 通常のターン移行では対象効果をここで消さない。解決関数が明示的に解除する。 */
+    awaitingCounterChoice = false;
+    if(counterChoiceOverlay) counterChoiceOverlay.classList.add("hidden");
+
+    playerSaidUno = false;
+
+    unoPenaltyApplied = false;
+
+    unoProcessing = false;
+
+    unoBadge
+        .classList
+        .add("hidden");
+}
+
+
+function startCurrentTurn(){
+
+    if(
+        gameOver ||
+        !gameStarted
+    ){
+
+        return;
+    }
+
+    render();
+
+    const player =
+        players[currentPlayer];
+
+    if(pendingTargetEffect && currentPlayer === pendingTargetEffect.target){
+        handlePendingTargetEffectTurn();
+        return;
+    }
+
+    if(player.type==="cpu" && player.finished){
+
+        nextPlayer();
+        resetUnoState();
+        render();
+        startCurrentTurn();
+        return;
+    }
+
+    if(player.type==="human"){
+
+        showMessage(
+            "あなたのターンです。"
+        );
+
+        if(pendingDraw > 0){
+            handlePendingDrawTurn(currentPlayer);
+        }
+
+        return;
+    }
+
+    if(cpuTimer){
+
+        clearTimeout(cpuTimer);
+    }
+
+    cpuTimer =
+        setTimeout(() => {
+
+            cpuTimer = null;
+
+            cpuTurn();
+
+        },CPU_ACTION_DELAY);
+}
+
+
+function cpuTurn(){
+
+    if(
+        gameOver ||
+        !gameStarted ||
+        currentPlayer===0
+    ){
+
+        return;
+    }
+
+    if(cpuProcessing){
+        return;
+    }
+
+    cpuProcessing = true;
+
+    const cpu =
+        players[currentPlayer];
+
+    if(cpu.finished){
+
+        cpuProcessing = false;
+        nextPlayer();
+        resetUnoState();
+        render();
+        startCurrentTurn();
+        return;
+    }
+
+    if(hasFullExodia(cpu.hand)){
+
+        showMessage(
+            `${cpu.name}がエグゾディアを完成させましたが、プレイヤーが終了するまでゲームを続行します！`
+        );
+
+        cpuProcessing = false;
+
+        nextPlayer();
+
+        resetUnoState();
+
+        render();
+
+        startCurrentTurn();
+
+        return;
+    }
+
+    if(pendingDraw > 0){
+        /* 累積ドロー処理へ渡す前にCPUロックを解除する。
+           handlePendingDrawTurn() は内部で次のターンを開始するため、
+           ここがtrueのままだと次のCPUターンが停止してしまう。 */
+        cpuProcessing = false;
+        handlePendingDrawTurn(currentPlayer);
+        return;
+    }
+
+    let playable =
+        cpu.hand
+            .map((card,index)=>({
+                card,
+                index
+            }))
+            .filter(item =>
+                canPlay(item.card)
+            );
+
+    if(playable.length===0){
+
+        /* 通常のドロー時は、出せるカードが出るまで引き続ける */
+        cpuDrawUntilPlayable();
+
+        return;
+    }
+
+    const priority = {
+
+        exodia:100,
+
+        draw4:90,
+
+        draw10:85,
+
+        counter:95,
+
+        lowestRight:78,
+
+        draw2:80,
+
+        skip:70,
+
+        reverse:60,
+
+        wild:50,
+
+        number:10
+
+    };
+
+    playable.sort((a,b)=>{
+
+        return (
+            priority[b.card.type] -
+            priority[a.card.type]
+        );
+
+    });
+
+    playCpuCard(
+        playable[0].index
+    );
+}
+
+
+function cpuDrawUntilPlayable(){
+
+    const cpu =
+        players[currentPlayer];
+
+    if(!cpu || cpu.finished){
+        cpuProcessing = false;
+        nextPlayer();
+        resetUnoState();
+        render();
+        startCurrentTurn();
+        return;
+    }
+
+    let drawnCount = 0;
+
+    while(!cpu.hand.some(card => canPlay(card))){
+
+        const card =
+            drawFromDeck();
+
+        if(!card){
+            break;
+        }
+
+        cpu.hand.push(card);
+        drawnCount++;
+
+        if(hasFullExodia(cpu.hand)){
+            showMessage(
+                `${cpu.name}がエグゾディアを完成させましたが、プレイヤーが終了するまでゲームを続行します！`
+            );
+            break;
+        }
+    }
+
+    if(drawnCount > 0){
+        showMessage(
+            `${cpu.name}は出せるカードがなかったため、${drawnCount}枚引きました。`
+        );
+        showEffect(
+            `${cpu.name} +${drawnCount}`,
+            "#66ff99"
+        );
+    }
+
+    if(cpu.hand.some(card => canPlay(card))){
+        render();
+        setTimeout(() => {
+            cpuProcessing = false;
+            cpuTurn();
+        }, CPU_ACTION_DELAY);
+        return;
+    }
+
+    cpuProcessing = false;
+    render();
+    nextPlayer();
+    resetUnoState();
+    startCurrentTurn();
+}
+
+
+function cpuDraw(){
+
+    const cpu =
+        players[currentPlayer];
+
+    if(!cpu || cpu.finished){
+        cpuProcessing = false;
+        nextPlayer();
+        resetUnoState();
+        render();
+        startCurrentTurn();
+        return;
+    }
+
+    const amount =
+        pendingDraw>0
+            ? pendingDraw
+            : 1;
+
+    showMessage(
+        `${cpu.name}が${amount}枚ドローしました。`
+    );
+
+    for(let i=0; i<amount; i++){
+
+        const card =
+            drawFromDeck();
+
+        if(card){
+
+            cpu.hand.push(card);
+
+        }
+
+        if(hasFullExodia(cpu.hand)){
+
+            pendingDraw = 0;
+
+            showMessage(
+                `${cpu.name}がエグゾディアを完成させましたが、プレイヤーが終了するまでゲームを続行します！`
+            );
+
+            cpuProcessing = false;
+
+            nextPlayer();
+
+            resetUnoState();
+
+            render();
+
+            startCurrentTurn();
+
+            return;
+        }
+    }
+
+    if(pendingDraw>0){
+
+        showEffect(
+            `${cpu.name} +${amount}`,
+            "#ff9100"
+        );
+
+        pendingDraw = 0;
+        pendingDrawSource = null;
+
+    }else{
+
+        showMessage(
+            `${cpu.name}がカードを1枚引きました。`
+        );
+    }
+
+    render();
+
+    nextPlayer();
+
+    resetUnoState();
+
+    cpuProcessing = false;
+
+    render();
+
+    startCurrentTurn();
+}
+
+
+function playCpuCard(index){
+
+    const cpu =
+        players[currentPlayer];
+
+    const card =
+        cpu.hand[index];
+
+    if(!card){
+
+        cpuProcessing = false;
+
+        return;
+    }
+
+    cpu.hand.splice(
+        index,
+        1
+    );
+
+    /*
+     * エグゾディア単体
+     */
+    if(card.type==="exodia"){
+
+        currentColor =
+            chooseCpuColor(cpu);
+
+        showMessage(
+            `${cpu.name}が${card.name}をワイルドとして使用！`
+        );
+
+        showMessage(
+            `${cpu.name}が${COLOR_NAMES[currentColor]}を選択！`
+        );
+
+        deck.push(card);
+
+        shuffle(deck);
+
+        /*
+         * エグゾディア単体で手札0枚なら
+         * 山札へ戻してから補充。
+         */
+        if(cpu.hand.length===0){
+
+            refillCpuHand(cpu);
+
+            if(gameOver){
+
+                cpuProcessing = false;
+
+                return;
+            }
+        }
+
+        nextPlayer();
+
+        resetUnoState();
+
+        cpuProcessing = false;
+
+        render();
+
+        startCurrentTurn();
+
+        return;
+    }
+
+    discardPile.push(card);
+
+    if(card.color){
+
+        currentColor =
+            card.color;
+    }
+
+    if(card.type==="lucky"){
+        const luckyIndices = [];
+        for(let i=0; i<cpu.hand.length && luckyIndices.length<2; i++){
+            if(cpu.hand[i] && cpu.hand[i].color === card.color){
+                luckyIndices.push(i);
+            }
+        }
+        showEffect(`${cpu.name} LUCKY!`, "#ffe45c");
+        showMessage(`${cpu.name}が${COLOR_NAMES[card.color]}のラッキーカードを使用！`);
+        for(let i=luckyIndices.length-1; i>=0; i--){
+            const chosen = cpu.hand.splice(luckyIndices[i],1)[0];
+            if(chosen) discardPile.push(chosen);
+        }
+        showMessage(`${cpu.name}が${COLOR_NAMES[card.color]}のカードを2枚捨てました。`);
+        if(cpu.hand.length===0){
+            const ended = actionCardFinishPenalty(cpu, card);
+            if(ended){ cpuProcessing=false; render(); return; }
+        }
+        nextPlayer();
+        resetUnoState();
+        cpuProcessing=false;
+        render();
+        startCurrentTurn();
+        return;
+    }
+
+    if(card.type==="wild"){
+
+        /*
+         * CPUのWILDもドロー系カードの上に重ねた場合は、
+         * ドロー効果を引き継がずWILD単体として機能する。
+         */
+        if(pendingDraw > 0){
+            pendingDraw = 0;
+            pendingDrawSource = null;
+        }
+
+        showEffect(
+            `${cpu.name} WILD!`,
+            "#ffffff"
+        );
+
+        currentColor =
+            chooseCpuColor(cpu);
+
+        showMessage(
+            `${cpu.name}が${COLOR_NAMES[currentColor]}を選択！`
+        );
+
+        /*
+         * CPUがWILDで上がった場合も
+         * 役カード上がりペナルティ。
+         */
+        if(cpu.hand.length===0){
+
+            const ended =
+                actionCardFinishPenalty(
+                    cpu,
+                    card
+                );
+
+            if(ended){
+
+                cpuProcessing = false;
+
+                render();
+
+                return;
+            }
+        }
+
+        nextPlayer();
+
+        resetUnoState();
+
+        cpuProcessing = false;
+
+        render();
+
+        startCurrentTurn();
+
+        return;
+    }
+
+    if(card.type==="draw4"){
+
+        pendingDraw += 4;
+        pendingDrawLastAmount = 4;
+        pendingDrawSource = cpu;
+
+        showEffect(
+            `${cpu.name} +4!`,
+            "#ff43d0"
+        );
+
+        currentColor =
+            chooseCpuColor(cpu);
+
+        shakeScreen();
+
+        showMessage(
+            `${cpu.name}が${COLOR_NAMES[currentColor]}を選択！`
+        );
+
+        /*
+         * CPUの+4上がりもペナルティ。
+         */
+        if(cpu.hand.length===0){
+
+            const ended =
+                actionCardFinishPenalty(
+                    cpu,
+                    card
+                );
+
+            if(ended){
+
+                cpuProcessing = false;
+
+                render();
+
+                return;
+            }
+        }
+
+        nextPlayer();
+
+        resetUnoState();
+
+        cpuProcessing = false;
+
+        render();
+
+        startCurrentTurn();
+
+        return;
+    }
+
+    if(card.type==="draw2"){
+
+        pendingDraw += 2;
+        pendingDrawLastAmount = 2;
+        pendingDrawSource = cpu;
+
+        showEffect(
+            `${cpu.name} +2!`,
+            "#ffb300"
+        );
+
+        shakeScreen();
+    }
+
+    if(card.type==="rights"){
+
+        /* 自分以外の参加中プレイヤー全員が2枚引く */
+        for(let i=0; i<players.length; i++){
+            const active = onlineMode ? i < onlinePlayerCount : i <= cpuCount;
+            if(!active || i===currentPlayer || players[i].finished){
+                continue;
+            }
+            for(let n=0; n<2; n++){
+                const drawn = drawFromDeck();
+                if(drawn){
+                    players[i].hand.push(drawn);
+                }
+            }
+        }
+        pendingDraw = 0;
+        pendingDrawSource = null;
+
+        showEffect(
+            `${cpu.name} 臣民の権利！`,
+            "#ffd54a"
+        );
+        showMessage(
+            `${cpu.name}が臣民の権利を使用！自分以外の全員が2枚ドロー！`
+        );
+        shakeScreen();
+    }
+
+    if(card.type==="kingView"){
+
+        pendingDraw = 0;
+        pendingDrawSource = null;
+
+        const target = chooseCpuTarget(currentPlayer);
+
+        if(target!==null){
+            showEffect(`${cpu.name} 王の景色！`, "#ffd54a");
+            showMessage(`${cpu.name}が${players[target].name}を対象に王の景色を発動！`);
+            shakeScreen();
+            cpuProcessing = false;
+            beginTargetEffect(currentPlayer, target, "kingView");
+            return;
+        }
+    }
+
+    if(card.type==="lowestRight"){
+
+        pendingDraw = 0;
+        pendingDrawSource = null;
+        pendingTargetEffect = null;
+        applyLowestRight(currentPlayer);
+
+        if(cpu.hand.length===0){
+            const ended = actionCardFinishPenalty(cpu, card);
+            if(ended){
+                cpuProcessing = false;
+                render();
+                return;
+            }
+        }
+
+        nextPlayer();
+        resetUnoState();
+        cpuProcessing = false;
+        render();
+        startCurrentTurn();
+        return;
+    }
+
+    if(card.type==="highestRight"){
+
+        pendingDraw = 0;
+        pendingDrawSource = null;
+        pendingTargetEffect = null;
+        applyHighestRight(currentPlayer);
+
+        if(cpu.hand.length===0){
+            const ended = actionCardFinishPenalty(cpu, card);
+            if(ended){
+                cpuProcessing = false;
+                render();
+                return;
+            }
+        }
+
+        nextPlayer();
+        resetUnoState();
+        cpuProcessing = false;
+        render();
+        startCurrentTurn();
+        return;
+    }
+
+    if(card.type==="draw10"){
+
+        pendingDraw += 10;
+        pendingDrawLastAmount = 10;
+        pendingDrawSource = cpu;
+
+        showEffect(
+            `${cpu.name} +10!`,
+            "#ff4d4d"
+        );
+
+        shakeScreen();
+    }
+
+    if(card.type==="skip"){
+
+        showEffect(
+            `${cpu.name} SKIP!`,
+            "#ff5252"
+        );
+    }
+
+    if(card.type==="reverse"){
+
+        showEffect(
+            `${cpu.name} REVERSE!`,
+            "#4db8ff"
+        );
+
+        direction *= -1;
+    }
+
+    /*
+     * CPUが役カードで上がった場合
+     */
+    if(cpu.hand.length===0){
+
+        if(isActionCard(card)){
+
+            const ended =
+                actionCardFinishPenalty(
+                    cpu,
+                    card
+                );
+
+            if(ended){
+
+                cpuProcessing = false;
+
+                render();
+
+                return;
+            }
+
+        }else{
+
+            /*
+             * CPUが手札を使い切ってもラウンドは終了しない。
+             * プレイヤーが終了するまでゲームを続行する。
+             */
+            cpu.finished = true;
+
+            showMessage(
+                `${cpu.name}が上がりました！以後このCPUは操作せず、ゲームを続行します。`
+            );
+
+            cpuProcessing = false;
+
+            nextPlayer();
+
+            resetUnoState();
+
+            render();
+
+            startCurrentTurn();
+
+            return;
+        }
+    }
+
+    if(cpu.hand.length===1){
+
+        showMessage(
+            `${cpu.name}「UNO！」`
+        );
+    }
+
+    if(card.type==="skip"){
+        const target = getNextPlayerIndex(currentPlayer);
+        cpuProcessing = false;
+        beginTargetEffect(currentPlayer, target, "skip");
+        return;
+    }
+
+    nextPlayer();
+
+    resetUnoState();
+
+    cpuProcessing = false;
+
+    render();
+
+    startCurrentTurn();
+}
+
+
+function refillCpuHand(cpu){
+
+    showEffect(
+        `${cpu.name} 補充!`,
+        "#66ff99"
+    );
+
+    showMessage(
+        `${cpu.name}が手札を使い切ったため7枚補充します。`
+    );
+
+    while(cpu.hand.length<7){
+
+        const card =
+            drawFromDeck();
+
+        if(!card){
+
+            break;
+        }
+
+        cpu.hand.push(card);
+
+        if(hasFullExodia(cpu.hand)){
+
+            showMessage(
+                `${cpu.name}がエグゾディアを完成させましたが、プレイヤーが終了するまでゲームを続行します！`
+            );
+
+            return false;
+        }
+    }
+
+    render();
+
+    return false;
+}
+
+
+function chooseCpuColor(cpu){
+
+    const count = {
+
+        red:0,
+        yellow:0,
+        green:0,
+        blue:0
+
+    };
+
+    cpu.hand.forEach(card => {
+
+        if(
+            card.color &&
+            count[card.color] !== undefined
+        ){
+
+            count[
+                card.color
+            ]++;
+
+        }
+
+    });
+
+    let best =
+        COLORS[0];
+
+    COLORS.forEach(color => {
+
+        if(
+            count[color] >
+            count[best]
+        ){
+
+            best =
+                color;
+        }
+
+    });
+
+    return best;
+}
+
+
+function getActionCardLogName(card){
+
+    if(!card){
+        return "カード";
+    }
+
+    if(card.type==="number"){
+        return `${COLOR_NAMES[card.color] || ""}${card.value}`;
+    }
+
+    const names = {
+        skip:"スキップ",
+        reverse:"リバース",
+        draw2:"ドロー2",
+        draw10:"ドロー10",
+        counter:"カウンター",
+        rights:"臣民の権利",
+        kingView:"王の景色",
+        lowestRight:"最下層の権利",
+        highestRight:"最上位の権利",
+        donmaiGG:"ドンマイGG",
+        lucky:"ラッキー",
+        wild:"ワイルド",
+        draw4:"ドロー4",
+        exodia:card.name || "エグゾディア"
+    };
+
+    return names[card.type] || card.value || card.name || "カード";
+}
+
+
+function getCounterCards(player){
+    if(!player || !Array.isArray(player.hand)) return [];
+    /* ドローを受けている間に出せるのはドロー系カードとカウンターのみ */
+    return player.hand.filter(card => card && (
+        card.type === "draw2" ||
+        card.type === "draw4" ||
+        card.type === "draw10" ||
+        card.type === "counter"
+    ));
+}
+
+function counterPendingDraw(playerIndex=0){
+    const player = players[playerIndex];
+    if(!player || pendingDraw <= 0) return false;
+
+    const index = player.hand.findIndex(card => card && card.type === "counter");
+    if(index < 0) return false;
+
+    const counterCard = player.hand.splice(index,1)[0];
+    discardPile.push(counterCard);
+
+    const amount = pendingDraw;
+    const source = pendingDrawSource;
+    const sourceIndex = players.indexOf(source);
+
+    pendingDraw = 0;
+    pendingDrawLastAmount = 0;
+    pendingDrawSource = null;
+    awaitingCounterChoice = false;
+    counterChoiceOverlay.classList.add("hidden");
+
+    showEffect("COUNTER!", "#d59cff");
+    showMessage(`${player.name}がカウンター！累積ドロー${amount}枚を反射します。`);
+    shakeScreen();
+
+    if(source && sourceIndex >= 0 && !source.finished){
+        for(let i=0; i<amount; i++){
+            const card = drawFromDeck();
+            if(card) source.hand.push(card);
+        }
+        showMessage(`${source.name}が${amount}枚ドローしました。`);
+    }
+
+    render();
+    nextPlayer();
+    resetUnoState();
+    render();
+    startCurrentTurn();
+    return true;
+}
+
+function finishPendingDraw(playerIndex=0){
+    const player = players[playerIndex];
+    if(!player || pendingDraw <= 0) return;
+    const amount = pendingDraw;
+    for(let i=0;i<amount;i++){
+        const card = drawFromDeck();
+        if(card) player.hand.push(card);
+    }
+    showEffect(`+${amount}`, "#ff9100");
+    showMessage(`${player.name}が${amount}枚ドローしました。`);
+    shakeScreen();
+    pendingDraw = 0;
+    pendingDrawLastAmount = 0;
+    pendingDrawSource = null;
+    awaitingCounterChoice = false;
+    counterChoiceOverlay.classList.add("hidden");
+    if(hasFullExodia(player.hand)){
+        render();
+        exodiaVictory(player);
+        return;
+    }
+    render();
+    nextPlayer();
+    resetUnoState();
+    render();
+    startCurrentTurn();
+}
+
+function counterWithDrawCard(playerIndex, cardType){
+    if(cardType === "counter") return counterPendingDraw(playerIndex);
+    const player = players[playerIndex];
+    if(!player || pendingDraw <= 0) return false;
+    const index = player.hand.findIndex(card => card && card.type === cardType);
+    if(index < 0) return false;
+    const card = player.hand.splice(index,1)[0];
+    discardPile.push(card);
+    const add = cardType === "draw4" ? 4 : 2;
+    pendingDraw += add;
+    pendingDrawLastAmount = add;
+    pendingDrawSource = player;
+    awaitingCounterChoice = false;
+    counterChoiceOverlay.classList.add("hidden");
+    showEffect(`+${add} / 累積 ${pendingDraw}`, cardType === "draw4" ? "#ff43d0" : "#ffb300");
+    showMessage(`${player.name}が${cardType === "draw4" ? "ドロー4" : "ドロー2"}をカウンター！累積ドローは${pendingDraw}枚。`);
+    shakeScreen();
+    if(cardType === "draw4" && player.type === "human"){
+        openColorSelection("draw4Counter");
+        render();
+        return true;
+    }
+    if(cardType === "draw4") currentColor = chooseCpuColor(player);
+    render();
+    nextPlayer();
+    resetUnoState();
+    render();
+    startCurrentTurn();
+    return true;
+}
+
+function showCounterChoice(playerIndex=0){
+    const player = players[playerIndex];
+    if(!player || pendingDraw <= 0) return false;
+
+    /* 「カウンターして出す」を表示できるのは、
+       本物のカウンターカードを持っている場合だけ。
+       ドロー2/4/10を持っているだけでは表示しない。 */
+    const hasCounter = Array.isArray(player.hand) &&
+        player.hand.some(card => card && card.type === "counter");
+    if(!hasCounter){
+        awaitingCounterChoice = false;
+        if(counterChoiceOverlay) counterChoiceOverlay.classList.add("hidden");
+        finishPendingDraw(playerIndex);
+        return true;
+    }
+
+    awaitingCounterChoice = true;
+    counterChoiceText.textContent = `累積ドローは${pendingDraw}枚です。どうしますか？`;
+    counterChoiceOverlay.classList.remove("hidden");
+    return true;
+}
+
+function handlePendingDrawTurn(playerIndex=0){
+    if(pendingDraw <= 0) return false;
+    const player = players[playerIndex];
+    if(!player) return false;
+
+    /* 累積ドロー中に「カウンターして出す」を表示する条件は
+       カウンターカードを実際に持っていることだけ。
+       カウンターがなければ、人間もCPUもそのままドローを受け入れる。 */
+    const hasCounter = Array.isArray(player.hand) &&
+        player.hand.some(card => card && card.type === "counter");
+
+    if(player.type === "human"){
+        if(hasCounter) return showCounterChoice(playerIndex);
+        finishPendingDraw(playerIndex);
+        return true;
+    }
+
+    if(player.type === "cpu"){
+        cpuProcessing = false;
+        if(hasCounter){
+            counterPendingDraw(playerIndex);
+        }else{
+            finishPendingDraw(playerIndex);
+        }
+        return true;
+    }
+    return false;
+}
+
+function playerDraw(playerIndex=0){
+
+    if(
+        !gameStarted ||
+        gameOver ||
+        currentPlayer!==playerIndex ||
+        awaitingColor
+    ){
+        return;
+    }
+
+    const player =
+        players[playerIndex];
+
+    if(!player){
+        return;
+    }
+
+    if(pendingDraw > 0){
+        handlePendingDrawTurn(playerIndex);
+        return;
+    }
+
+    /*
+     * 通常ドロー：
+     * 出せるカードがない場合だけ、出せるカードが出るまで
+     * 自動的に連続してカードを引く。
+     */
+    if(player.hand.some(card => canPlay(card))){
+
+        showMessage(
+            "出せるカードがあるため、カードを引く必要はありません。"
+        );
+
+        return;
+    }
+
+    let drawnCount = 0;
+
+    while(!player.hand.some(card => canPlay(card))){
+
+        const card =
+            drawFromDeck();
+
+        if(!card){
+            break;
+        }
+
+        player.hand.push(card);
+        drawnCount++;
+
+        if(hasFullExodia(player.hand)){
+
+            render();
+            exodiaVictory(player);
+            return;
+        }
+    }
+
+    if(drawnCount > 0){
+
+        showEffect(
+            `+${drawnCount}`,
+            "#66ff99"
+        );
+
+        showMessage(
+            `出せるカードがなかったため、${drawnCount}枚引きました。出せるカードが出ました！`
+        );
+
+    }else{
+
+        showMessage(
+            "カードを引けませんでした。"
+        );
+    }
+
+    /* 出せるカードが出た後もターンは維持する */
+    render();
+}
+
+
+function playerUno(playerIndex=0){
+
+    if(unoProcessing){
+
+        return;
+    }
+
+    if(
+        !gameStarted ||
+        gameOver ||
+        currentPlayer!==playerIndex
+    ){
+
+        return;
+    }
+
+    if(playerSaidUno){
+
+        return;
+    }
+
+    if(unoPenaltyApplied){
+
+        return;
+    }
+
+    unoProcessing = true;
+
+    const player =
+        players[playerIndex];
+
+    if(player.hand.length===1){
+
+        playerSaidUno = true;
+
+        showMessage(
+            "あなた「UNO！」"
+        );
+
+        unoBadge
+            .classList
+            .remove("hidden");
+
+        render();
+
+        setTimeout(() => {
+
+            unoProcessing = false;
+
+        },300);
+
+        return;
+    }
+
+    unoPenaltyApplied = true;
+
+    showMessage(
+        "誤UNO！ペナルティで2枚ドロー！"
+    );
+
+    showEffect(
+        "PENALTY!",
+        "#ff3030"
+    );
+
+    for(let i=0; i<2; i++){
+
+        const card =
+            drawFromDeck();
+
+        if(card){
+
+            player.hand.push(card);
+
+        }
+
+        if(hasFullExodia(player.hand)){
+
+            render();
+
+            unoProcessing = false;
+
+            exodiaVictory(player);
+
+            return;
+        }
+    }
+
+    render();
+
+    setTimeout(() => {
+
+        unoProcessing = false;
+
+    },400);
+}
+
+
+function createCardElement(
+    card,
+    hidden=false
+){
+
+    const el =
+        document.createElement("div");
+
+    el.classList.add("card");
+
+    if(hidden){
+
+        el.classList.add("back");
+
+        return el;
+    }
+
+    if(card.type==="exodia"){
+
+        el.classList.add(
+            "exodia-card"
+        );
+
+        el.innerHTML = `
+
+            <div class="card-corner">
+                WILD
+            </div>
+
+            <div class="card-content">
+
+                <div class="exodia-symbol">
+                    ${card.symbol}
+                </div>
+
+                ${card.name}
+
+                <br>
+
+                <small>
+                    WILD
+                </small>
+
+            </div>
+
+            <div class="card-corner bottom">
+                WILD
+            </div>
+
+        `;
+
+        return el;
+    }
+
+    if(card.color){
+
+        el.classList.add(
+            card.color
+        );
+
+    }else{
+
+        el.classList.add(
+            "black"
+        );
+    }
+
+    let text = "";
+
+    switch(card.type){
+
+        case "number":
+            text = card.value;
+            break;
+
+        case "skip":
+            text = "⊘";
+            break;
+
+        case "reverse":
+            text = "↻";
+            break;
+
+        case "draw2":
+            text = "+2";
+            break;
+
+        case "draw10":
+            text = "+10";
+            break;
+
+        case "counter":
+            text = "COUNTER";
+            break;
+
+        case "rights":
+            text = "臣民の権利";
+            break;
+
+        case "kingView":
+            text = "王の景色";
+            break;
+
+        case "lowestRight":
+            text = "最下層の権利";
+            break;
+
+        case "highestRight":
+            text = "最上位の権利";
+            break;
+
+        case "donmaiGG":
+            text = "ドンマイGG";
+            break;
+
+        case "lucky":
+            text = "ラッキー";
+            break;
+
+        case "wild":
+            text = "WILD";
+            break;
+
+        case "draw4":
+            text = "+4";
+            break;
+    }
+
+    el.innerHTML = `
+
+        <div class="card-corner">
+            ${text}
+        </div>
+
+        <div class="card-content">
+            ${text}
+        </div>
+
+        <div class="card-corner bottom">
+            ${text}
+        </div>
+
+    `;
+
+    return el;
+}
+
+
+
+function updateTurnIndicator(){
+
+    const indicator =
+        document.getElementById("turn-indicator");
+
+    if(!indicator){
+        return;
+    }
+
+    if(gameOver){
+        indicator.textContent = "ラウンド終了";
+        return;
+    }
+
+    if(!gameStarted){
+        indicator.textContent = "現在のターン：ゲーム開始待ち";
+        return;
+    }
+
+    const player = players[currentPlayer];
+
+    if(!player){
+        indicator.textContent = "現在のターン：—";
+        return;
+    }
+
+    indicator.textContent =
+        `現在のターン：${player.name}`;
+}
+
+function sortHandCards(hand){
+
+    if(!Array.isArray(hand)){
+        return;
+    }
+
+    const colorOrder = {
+        red:0,
+        yellow:1,
+        green:2,
+        blue:3
+    };
+
+    const typeOrder = {
+        number:0,
+        skip:1,
+        reverse:2,
+        draw2:3,
+        draw10:4,
+        counter:5,
+        rights:10,
+        kingView:11,
+        lowestRight:12,
+        highestRight:13,
+        donmaiGG:14,
+        lucky:15,
+        wild:16,
+        draw4:17,
+        exodia:18
+    };
+
+    hand.sort((a,b) => {
+        const aColor = a && a.color != null ? (colorOrder[a.color] ?? 99) : 99;
+        const bColor = b && b.color != null ? (colorOrder[b.color] ?? 99) : 99;
+
+        if(aColor !== bColor){
+            return aColor - bColor;
+        }
+
+        const aType = typeOrder[a?.type] ?? 99;
+        const bType = typeOrder[b?.type] ?? 99;
+
+        if(aType !== bType){
+            return aType - bType;
+        }
+
+        if(a?.type === "number" && b?.type === "number"){
+            return Number(a.value) - Number(b.value);
+        }
+
+        return Number(a?.id ?? 0) - Number(b?.id ?? 0);
+    });
+}
+
+function sortAllPlayerHands(){
+    players.forEach(player => {
+        if(player && Array.isArray(player.hand)){
+            sortHandCards(player.hand);
+        }
+    });
+}
+
+function render(){
+
+    sortAllPlayerHands();
+
+    updateTurnIndicator();
+
+    /* 現在の進行方向を円形矢印に反映 */
+    const turnDirectionRing =
+        document.getElementById("turnDirectionRing");
+
+    if(turnDirectionRing){
+        turnDirectionRing.classList.toggle(
+            "hidden",
+            !gameStarted || gameOver
+        );
+        turnDirectionRing.classList.toggle(
+            "reverse",
+            direction === -1
+        );
+    }
+
+    playerHandEl.innerHTML = "";
+
+    const localRenderSlot = onlineMode ? onlinePlayerSlot : 0;
+    const player =
+        players[localRenderSlot];
+
+    const localNameEl = document.getElementById("playerNameLabel");
+    const localIconEl = document.getElementById("playerIcon");
+    if(localNameEl) localNameEl.textContent = player.name || playerProfile.name;
+    if(localIconEl) localIconEl.textContent = player.icon || playerProfile.icon;
+
+    player.hand.forEach(
+        (card,index) => {
+
+            const el =
+                createCardElement(
+                    card
+                );
+
+            el.classList.add(
+                "player-card"
+            );
+
+            if(
+                currentPlayer!==localRenderSlot ||
+                awaitingColor ||
+                !gameStarted ||
+                !canPlay(card)
+            ){
+
+                el.classList.add(
+                    "unplayable"
+                );
+
+            }else{
+
+                el.classList.add(
+                    "playable"
+                );
+            }
+
+            el.addEventListener(
+                "click",
+                () => {
+                    if(onlineMode && !onlineIsHost){
+                        onlineSend(onlineConnections.host,{type:"action",action:"play",index});
+                    }else{
+                        playerPlay(index,localRenderSlot);
+                    }
+                }
+            );
+
+            playerHandEl.appendChild(
+                el
+            );
+        }
+    );
+
+    for(let i=1; i<=3; i++){
+
+        const cpu =
+            players[i];
+
+        const cpuNameEl = document.querySelector(`.cpu-box .player-name #cpu${i}Count`)?.parentElement;
+        if(cpuNameEl){
+            cpuNameEl.firstChild.textContent = "";
+            cpuNameEl.innerHTML = `<span class="player-icon">${cpu.icon || "🤖"}</span>${cpu.name || `CPU ${i}`} <span id="cpu${i}Count">${cpu.hand.length}</span>枚`;
+        }
+
+        const handEl =
+            cpuHands[i-1];
+
+        const cpuContainer =
+            handEl.closest(".cpu-player") ||
+            handEl.closest(".cpu-top");
+
+        if(cpuContainer){
+            cpuContainer.style.display =
+                i <= (onlineMode ? onlinePlayerCount - 1 : cpuCount) ? "" : "none";
+        }
+
+        handEl.innerHTML = "";
+
+        /* CPUの手札表示は最大10枚まで。
+           実際の手札枚数は変更せず、画面上のカードだけを制限する。 */
+        const visibleCpuCardCount = Math.min(cpu.hand.length, 10);
+
+        for(let cardIndex = 0; cardIndex < visibleCpuCardCount; cardIndex++){
+            handEl.appendChild(
+                createCardElement(
+                    null,
+                    true
+                )
+            );
+        }
+
+        const cpuCountEl = document.getElementById(`cpu${i}Count`);
+        if(cpuCountEl) cpuCountEl.textContent = cpu.hand.length;
+    }
+
+    discardCardEl.innerHTML = "";
+
+    /* 場に出ているカードは常に discardPile の最後の1枚だけを表示する。
+       CPU処理や効果処理の途中で古いカードを参照しない。 */
+    const top =
+        discardPile.length > 0
+            ? discardPile[discardPile.length - 1]
+            : null;
+
+    if(top){
+
+        const topElement =
+            createCardElement(
+                top
+            );
+
+        /*
+         * ワイルド系は現在選択された色を
+         * 場のカードにも反映
+         */
+        if(
+            top.type==="wild" ||
+            top.type==="draw4"
+        ){
+
+            if(top.type==="wild"){
+                topElement.classList.add("wild-display");
+            }
+
+            topElement.classList.remove(
+                "black",
+                "red",
+                "yellow",
+                "green",
+                "blue"
+            );
+
+            if(currentColor){
+
+                topElement.classList.add(
+                    currentColor
+                );
+
+            }else{
+
+                topElement.classList.add(
+                    "black"
+                );
+            }
+        }
+
+        discardCardEl.appendChild(
+            topElement
+        );
+    }
+
+    deckCardEl.innerHTML = "";
+
+    deckCardEl.appendChild(
+        createCardElement(
+            null,
+            true
+        )
+    );
+
+    playerCountEl.textContent =
+        player.hand.length;
+
+    deckCountEl.textContent =
+        deck.length;
+
+    discardCountEl.textContent =
+        discardPile.length;
+
+    const exodiaCount =
+        player.hand.filter(
+            card =>
+                card.type==="exodia"
+        ).length;
+
+    exodiaCountEl.textContent =
+        `${exodiaCount} / 5`;
+
+    if(gameStarted){
+
+        turnTextEl.textContent =
+            players[currentPlayer].name;
+
+    }else{
+
+        turnTextEl.textContent =
+            gameOver
+                ? "終了"
+                : "準備中";
+    }
+
+    currentColorTextEl.textContent =
+        currentColor
+            ? ` / ${COLOR_NAMES[currentColor]}`
+            : "";
+
+    /*
+     * 自分の通常ターンで出せるカードが1枚もない場合は
+     * 「カードを引く」を必ず押せるようにする。
+     * ドロー効果を受けている場合も同様にドロー操作を許可する。
+     */
+    const hasPlayableCard =
+        player.hand.some(card => canPlay(card));
+
+    const localPlayerCanDraw =
+        pendingDraw > 0 ||
+        !hasPlayableCard;
+
+    const isLocalTurn =
+        currentPlayer === localRenderSlot;
+
+    drawButton.disabled =
+        !gameStarted ||
+        gameOver ||
+        !isLocalTurn ||
+        awaitingColor ||
+        !localPlayerCanDraw;
+
+    const playerHasPlayableCard =
+        player.hand.some(card => canPlay(card));
+
+
+    /*
+     * オンラインでは「ロジック上の場札」と「画面に描画した場札」が
+     * 必ず同じ状態になるよう、ホストの最新状態を描画完了後に配信する。
+     * 20msの遅延配信が残っていても、ここで最新スナップショットに更新する。
+     */
+    if(onlineMode && onlineIsHost){
+        clearTimeout(window.__onlineBroadcastTimer);
+        window.__onlineBroadcastTimer=setTimeout(onlineBroadcastState,0);
+    }
+}
+
+
+function showEffect(
+    text,
+    color
+){
+
+    const el =
+        document.createElement(
+            "div"
+        );
+
+    el.className =
+        "effect-text";
+
+    el.textContent =
+        text;
+
+    el.style.color =
+        color;
+
+    effectLayer.appendChild(
+        el
+    );
+
+    setTimeout(() => {
+
+        el.remove();
+
+    },1200);
+}
+
+
+function shakeScreen(){
+
+    const game =
+        document.getElementById(
+            "game"
+        );
+
+    game.classList.add(
+        "shake"
+    );
+
+    setTimeout(() => {
+
+        game.classList.remove(
+            "shake"
+        );
+
+    },500);
+}
+
+
+function clearMessageHistory(){
+
+    if(!messageEl){
+        return;
+    }
+
+    messageEl.innerHTML = "";
+}
+
+
+function showMessage(text){
+
+    if(!messageEl){
+        return;
+    }
+
+    const bubble =
+        document.createElement("div");
+
+    bubble.className =
+        "message-bubble latest";
+
+    bubble.textContent =
+        text;
+
+    /* 最新のログだけ少し強調 */
+    const previous =
+        messageEl.querySelectorAll(".message-bubble.latest");
+
+    previous.forEach(el => {
+        el.classList.remove("latest");
+    });
+
+    messageEl.appendChild(bubble);
+
+    /* ログは一定数まで保持し、古いものは削除 */
+    while(messageEl.children.length > 100){
+        messageEl.firstElementChild.remove();
+    }
+
+    /* 常に最新の行動が見える位置へ */
+    messageEl.scrollTop =
+        messageEl.scrollHeight;
+}
+
+
+/* エラー専用の行動ログ。画面上で「何が起きたか」と原因を確認できるようにする。 */
+function showErrorLog(error, source = "ゲーム処理") {
+    if(!messageEl) return;
+
+    const bubble = document.createElement("div");
+    bubble.className = "message-bubble error-log latest";
+
+    const message = error && error.message
+        ? error.message
+        : String(error || "不明なエラー");
+
+    const stack = error && error.stack
+        ? error.stack
+        : "";
+
+    const location = error && error.fileName
+        ? `\n発生場所: ${error.fileName}${error.lineNumber ? `:${error.lineNumber}` : ""}`
+        : "";
+
+    bubble.textContent =
+        `⚠ エラーが発生しました\n` +
+        `処理: ${source}\n` +
+        `原因: ${message}` +
+        location +
+        (stack ? `\n詳細: ${stack}` : "");
+
+    messageEl.querySelectorAll(".message-bubble.latest").forEach(el => {
+        el.classList.remove("latest");
+    });
+
+    messageEl.appendChild(bubble);
+
+    while(messageEl.children.length > 100){
+        messageEl.firstElementChild.remove();
+    }
+
+    messageEl.scrollTop = messageEl.scrollHeight;
+}
+
+/* 未処理のJavaScriptエラーを行動ログへ赤文字で記録する。 */
+window.addEventListener("error", event => {
+    const error = event.error || new Error(event.message || "不明なJavaScriptエラー");
+    if(event.filename){
+        error.fileName = event.filename;
+        error.lineNumber = event.lineno;
+    }
+    showErrorLog(error, "JavaScript実行中");
+});
+
+/* Promiseの未処理エラーも同じ行動ログへ記録する。 */
+window.addEventListener("unhandledrejection", event => {
+    const reason = event.reason instanceof Error
+        ? event.reason
+        : new Error(String(event.reason || "Promiseの処理に失敗しました"));
+    showErrorLog(reason, "非同期処理中");
+});
+
+
+const mainMenuOverlay = document.getElementById("mainMenuOverlay");
+const settingsOverlay = document.getElementById("settingsOverlay");
+const howToOverlay = document.getElementById("howToOverlay");
+const howToButton = document.getElementById("howToButton");
+const howToBackButton = document.getElementById("howToBackButton");
+const mainGameStartButton = document.getElementById("mainGameStartButton");
+const settingsButton = document.getElementById("settingsButton");
+const settingsBackButton = document.getElementById("settingsBackButton");
+const playerNameInput = document.getElementById("playerNameInput");
+
+loadPlayerProfile();
+renderPlayerProfile();
+if(playerNameInput) playerNameInput.value = playerProfile.name;
+buildPlayerIconOptions();
+
+
+function onlineSetStatus(message){
+    const el=document.getElementById("onlineStatus");
+    if(el) el.textContent=message;
+
+    if(onlineMode && onlineIsHost){
+        clearTimeout(window.__onlineBroadcastTimer);
+        window.__onlineBroadcastTimer=setTimeout(onlineBroadcastState,20);
+    }
+
+}
+
+function onlineCloseConnections(){
+    Object.values(onlineConnections).forEach(c=>{ try{c.close();}catch(e){} });
+    onlineConnections={};
+    if(onlinePeer){ try{onlinePeer.destroy();}catch(e){} }
+    onlinePeer=null;
+    onlineReady=false;
+}
+
+function onlineSetPlayerList(){
+    const list=document.getElementById("onlinePlayerList");
+    if(!list) return;
+    list.innerHTML="";
+    for(let i=0;i<onlinePlayerCount;i++){
+        const li=document.createElement("li");
+        li.textContent=`${i===0 ? "👑 " : ""}${players[i].name}`;
+        list.appendChild(li);
+    }
+}
+
+function onlineShowRoom(){
+    document.getElementById("onlineHomePanel").classList.add("hidden");
+    document.getElementById("onlineRoomPanel").classList.remove("hidden");
+    document.getElementById("onlineRoomCode").textContent=onlineRoomCode;
+    document.getElementById("onlineRoleText").textContent=onlineIsHost ? "あなたがホストです。最大4人まで参加できます。" : `参加中：${players[onlinePlayerSlot].name}`;
+    document.getElementById("onlineStartButton").style.display=onlineIsHost ? "" : "none";
+    onlineSetPlayerList();
+}
+
+function onlineSend(conn,msg){
+    if(conn && conn.open){
+        try{
+            conn.send(msg);
+            return true;
+        }catch(e){
+            try{ showErrorLog(e, "オンラインチャット送信"); }catch(_){}
+            return false;
+        }
+    }
+    return false;
+}
+
+function onlineBroadcast(msg, excludeSlot = null){
+    Object.entries(onlineConnections).forEach(([key,c])=>{
+        if(excludeSlot !== null && String(key) === String(excludeSlot)) return;
+        onlineSend(c,msg);
+    });
+}
+
+function onlineSerializeState(){
+    return {
+        /* 場札・山札・手番を含むゲーム状態を必ずホストから配信する */
+        deck,
+        discardPile,
+        currentPlayer,
+        direction,
+        currentColor,
+        pendingDraw,
+        pendingDrawLastAmount,
+        pendingDrawSourceId: pendingDrawSource ? pendingDrawSource.id : null,
+        awaitingCounterChoice,
+        awaitingLuckyChoice,
+        pendingLuckyPlayerIndex,
+        pendingLuckyColor,
+        pendingTargetEffect: pendingTargetEffect ? {
+            source: pendingTargetEffect.source,
+            target: pendingTargetEffect.target,
+            type: pendingTargetEffect.type,
+            amount: pendingTargetEffect.amount || 0
+        } : null,
+        gameStarted,
+        gameOver,
+        awaitingColor,
+        awaitingTarget,
+        targetPlayerIndex,
+        targetCardPlayerIndex,
+        rouletteRunning,
+        playerSaidUno,
+        unoPenaltyApplied,
+        unoProcessing,
+        exodiaReturnCard,
+        onlinePlayerCount,
+        players: players.map(p=>({
+            id:p.id,
+            name:p.name,
+            icon:p.icon,
+            type:p.type,
+            hand:p.hand,
+            finished:p.finished
+        }))
+    };
+}
+
+function onlineApplyState(st){
+    if(!st) return;
+
+    /* 受信した状態を丸ごと採用する。画面側だけが古い場札を保持しないようにする。 */
+    deck=Array.isArray(st.deck) ? st.deck : [];
+    discardPile=Array.isArray(st.discardPile) ? st.discardPile : [];
+    currentPlayer=Number.isInteger(st.currentPlayer)?st.currentPlayer:0;
+    direction=st.direction===-1 ? -1 : 1;
+    currentColor=st.currentColor||null;
+    pendingDraw=Number(st.pendingDraw)||0;
+    pendingDrawLastAmount=Number(st.pendingDrawLastAmount)||0;
+    pendingDrawSource = st.pendingDrawSourceId==null ? null : players[st.pendingDrawSourceId];
+    awaitingCounterChoice=!!st.awaitingCounterChoice;
+    awaitingLuckyChoice=!!st.awaitingLuckyChoice;
+    pendingLuckyPlayerIndex=Number.isInteger(st.pendingLuckyPlayerIndex)?st.pendingLuckyPlayerIndex:null;
+    pendingLuckyColor=st.pendingLuckyColor||null;
+    pendingTargetEffect = st.pendingTargetEffect ? {
+        source: Number(st.pendingTargetEffect.source),
+        target: Number(st.pendingTargetEffect.target),
+        type: st.pendingTargetEffect.type,
+        amount: Number(st.pendingTargetEffect.amount)||0
+    } : null;
+    gameStarted=!!st.gameStarted;
+    gameOver=!!st.gameOver;
+    awaitingColor=!!st.awaitingColor;
+    awaitingTarget=!!st.awaitingTarget;
+    targetPlayerIndex=Number.isInteger(st.targetPlayerIndex)?st.targetPlayerIndex:null;
+    targetCardPlayerIndex=Number.isInteger(st.targetCardPlayerIndex)?st.targetCardPlayerIndex:null;
+    rouletteRunning=!!st.rouletteRunning;
+    playerSaidUno=!!st.playerSaidUno;
+    unoPenaltyApplied=!!st.unoPenaltyApplied;
+    unoProcessing=!!st.unoProcessing;
+    exodiaReturnCard=st.exodiaReturnCard||null;
+    onlinePlayerCount=st.onlinePlayerCount||onlinePlayerCount;
+    (st.players||[]).forEach((p,i)=>{
+        if(!players[i]) return;
+        players[i].id=p.id;
+        players[i].name=p.name;
+        players[i].icon=p.icon || (i===0 ? playerProfile.icon : "🤖");
+        players[i].type=p.type;
+        players[i].hand=Array.isArray(p.hand) ? p.hand : [];
+        players[i].finished=!!p.finished;
+    });
+    document.getElementById("onlineBadge").style.display="block";
+    if(onlineMode && !onlineIsHost){
+        if(st.gameStarted){
+            rouletteOverlay.classList.add("hidden");
+            onlineOverlay.classList.add("hidden");
+        }else if(st.rouletteRunning){
+            rouletteOverlay.classList.remove("hidden");
+            rouletteName.textContent="ホストが決定中…";
+        }
+    }
+    render();
+    if(awaitingTarget && targetCardPlayerIndex===onlinePlayerSlot && currentPlayer===onlinePlayerSlot){
+        showTargetSelection(onlinePlayerSlot);
+    }else if(!awaitingTarget){
+        targetOverlay.classList.add("hidden");
+    }
+    if(awaitingLuckyChoice && pendingLuckyPlayerIndex===onlinePlayerSlot){
+        openLuckySelection(onlinePlayerSlot);
+    }else if(!awaitingLuckyChoice && luckyChoiceOverlay){
+        luckyChoiceOverlay.classList.add("hidden");
+    }
+    if(gameStarted && currentPlayer===onlinePlayerSlot && !gameOver && !awaitingTarget){
+        showMessage("あなたのターンです。");
+    }
+}
+
+function onlineBroadcastState(){
+    if(!onlineMode || !onlineIsHost) return;
+    onlineBroadcast({
+        type:"state",
+        state:onlineSerializeState()
+    });
+}
+
+function onlineHandleMessage(slot,data){
+    if(!data) return;
+    if(onlineIsHost){
+        if(data.type==="chat"){
+            const name = (players[slot]?.name || data.name || `プレイヤー${slot+1}`).slice(0,12);
+            const text = String(data.text || "").trim().slice(0,100);
+            if(text){
+                const msg = {type:"chat", slot, name, text};
+                addChatMessage(name, text, slot);
+                addOnlineWaitingChatMessage(name, text, slot);
+                // 送信元にはすでに即時表示しているため再送しない。
+                onlineBroadcast(msg, slot);
+            }
+            return;
+        }
+        if(data.type==="action"){
+            if(!gameStarted || gameOver || currentPlayer!==slot) return;
+            if(data.action==="play") playerPlay(Number(data.index),slot);
+            else if(data.action==="draw") playerDraw(slot);
+            else if(data.action==="uno") playerUno(slot);
+            else if(data.action==="color") selectColor(data.color,slot);
+            else if(data.action==="target") selectTarget(Number(data.target),slot);
+            else if(data.action==="lucky") resolveLuckySelection(slot, Array.isArray(data.indices) ? data.indices.map(Number) : []);
+            onlineBroadcastState();
+        }
+        return;
+    }
+    if(data.type==="chat"){
+        const chatSlot = Number.isInteger(data.slot) ? data.slot : null;
+        const chatName = data.name || "プレイヤー";
+        const chatText = data.text || "";
+        addChatMessage(chatName, chatText, chatSlot);
+        addOnlineWaitingChatMessage(chatName, chatText, chatSlot);
+        return;
+    }
+    if(data.type==="state") onlineApplyState(data.state);
+    if(data.type==="room-full") onlineSetStatus("この部屋は満員です。");
+    if(data.type==="host-started") onlineSetStatus("ゲームを開始しています…");
+}
+
+function onlineCreateRoom(){
+    if(typeof Peer === "undefined"){
+        onlineSetStatus("通信ライブラリを読み込めませんでした。ページを再読み込みしてください。");
+        return;
+    }
+
+    onlineName=(document.getElementById("onlineNameInput").value.trim()||playerProfile.name||"プレイヤー").slice(0,12);
+    onlineCloseConnections();
+    onlineMode=true; onlineIsHost=true; onlinePlayerSlot=0; onlinePlayerCount=1; onlineReady=false;
+    updateOnlineChatVisibility();
+    setMessageTab("log");
+
+    players.forEach((p,i)=>{
+        p.hand=[];
+        p.finished=false;
+        p.type=i===0?"human":"cpu";
+        p.name=i===0?onlineName:`CPU ${i}`;
+        p.icon=i===0?playerProfile.icon:"🤖";
+    });
+
+    /*
+     * ルームコードは通信確立を待たず、この時点で即発行する。
+     * これによりPeerJSサーバーが混雑していてもコードをすぐ共有できる。
+     */
+    let generatedCode="";
+    for(let attempt=0; attempt<8; attempt++){
+        generatedCode=Math.random().toString(36).slice(2,8).toUpperCase();
+        if(generatedCode.length===6) break;
+    }
+    onlineRoomCode=generatedCode;
+
+    /* まず画面をルーム表示に切り替える */
+    document.getElementById("onlineHomePanel").classList.add("hidden");
+    document.getElementById("onlineRoomPanel").classList.remove("hidden");
+    document.getElementById("onlineRoomCode").textContent=onlineRoomCode;
+    document.getElementById("onlineRoleText").textContent="ホストとして接続中…";
+    document.getElementById("onlinePlayerList").innerHTML="<li>👑 "+onlineName+"</li>";
+    document.getElementById("onlineStartButton").disabled=true;
+    document.getElementById("onlineBadge").style.display="block";
+    onlineSetStatus("ルームコードを作成しました。通信を接続しています…");
+
+    const peerId = generatedCode.toLowerCase();
+    let opened=false;
+    let finished=false;
+
+    try{
+        onlinePeer=new Peer(peerId,{debug:0,host:"0.peerjs.com",port:443,path:"/"});
+    }catch(err){
+        onlineSetStatus("ルームコードは発行済みですが、通信の開始に失敗しました。ページを再読み込みしてください。");
+        document.getElementById("onlineRoleText").textContent="通信開始失敗";
+        return;
+    }
+
+    const connectionTimeout=setTimeout(()=>{
+        if(!opened && !finished){
+            onlineSetStatus("コードは使用できます。通信接続に時間がかかっています。少し待っても接続しない場合は再作成してください。");
+            document.getElementById("onlineRoleText").textContent="通信待機中";
+        }
+    },5000);
+
+    onlinePeer.on("open",id=>{
+        opened=true;
+        clearTimeout(connectionTimeout);
+        onlineRoomCode=generatedCode;
+        document.getElementById("onlineRoomCode").textContent=onlineRoomCode;
+        onlineSetStatus("部屋を作りました。友達にルームコードを送ってください。");
+        onlineReady=true;
+        document.getElementById("onlineRoleText").textContent="ホスト";
+        document.getElementById("onlineStartButton").disabled=true;
+        onlineSetPlayerList();
+        onlinePeer.__fullId=id;
+    });
+
+    onlinePeer.on("connection",conn=>{
+        if(onlinePlayerCount>=4){
+            onlineSend(conn,{type:"room-full"});
+            conn.close();
+            return;
+        }
+        const slot=onlinePlayerCount++;
+        onlineConnections[slot]=conn;
+        conn.on("open",()=>{
+            onlineSend(conn,{type:"assign",slot,room:onlineRoomCode,hostId:onlinePeer.__fullId||peerId});
+        });
+        conn.on("data",data=>{
+            if(data.type==="hello"){
+                players[slot].type="human";
+                players[slot].name=(data.name||`プレイヤー${slot+1}`).slice(0,12);
+                players[slot].icon=data.icon || "🐰";
+                onlineSetPlayerList();
+                onlineSend(conn,{type:"state",state:onlineSerializeState(),slot});
+                onlineSetStatus(`${onlinePlayerCount}人が参加しています。`);
+                document.getElementById("onlineStartButton").disabled = onlinePlayerCount < 2;
+            }else{
+                onlineHandleMessage(slot,data);
+            }
+        });
+        conn.on("close",()=>{
+            players[slot].name=`プレイヤー${slot+1}（切断）`;
+            players[slot].finished=true;
+            onlineSetPlayerList();
+        });
+    });
+
+    onlinePeer.on("error",err=>{
+        finished=true;
+        clearTimeout(connectionTimeout);
+        const type = err && err.type ? err.type : "unknown";
+        if(type === "unavailable-id"){
+            onlineSetStatus("このコードは使用中でした。『部屋を作る』でもう一度作成してください。");
+        }else if(type === "network" || type === "server-error" || type === "socket-error"){
+            onlineSetStatus("コードは発行済みですが、オンラインサーバーに接続できません。インターネット接続を確認してください。");
+        }else{
+            onlineSetStatus("コードは発行済みですが、通信エラーが発生しました："+type);
+        }
+        document.getElementById("onlineRoleText").textContent = "通信エラー";
+    });
+}
+function onlineJoinRoom(){
+    if(typeof Peer === "undefined"){
+        onlineSetStatus("オンライン機能の読み込みに失敗しました。インターネット接続を確認してください。");
+        return;
+    }
+    onlineName=(document.getElementById("onlineNameInput").value.trim()||playerProfile.name||"プレイヤー").slice(0,12);
+    const code=document.getElementById("onlineRoomInput").value.trim().toUpperCase().replace(/\s/g,"");
+    if(!code){ onlineSetStatus("ルームコードを入力してください。"); return; }
+    if(!/^[A-Z0-9]{6}$/.test(code)){
+        onlineSetStatus("ルームコードは6文字で入力してください。");
+        return;
+    }
+
+    onlineCloseConnections();
+    onlineMode=true; onlineIsHost=false; onlineReady=false;
+    updateOnlineChatVisibility();
+    setMessageTab("log");
+    onlineRoomCode=code;
+    document.getElementById("onlineHomePanel").classList.add("hidden");
+    document.getElementById("onlineRoomPanel").classList.remove("hidden");
+    document.getElementById("onlineRoomCode").textContent=code;
+    document.getElementById("onlineRoleText").textContent="ホストへ接続中…";
+    document.getElementById("onlinePlayerList").innerHTML="<li>接続しています…</li>";
+    document.getElementById("onlineStartButton").style.display="none";
+    onlineSetStatus("部屋を探しています…");
+
+    const target=code.toLowerCase();
+    let joinFinished=false;
+    const joinTimeout=setTimeout(()=>{
+        if(joinFinished) return;
+        joinFinished=true;
+        onlineSetStatus("部屋に接続できませんでした。ホストが部屋を開いたままか、コードが正しいか確認してください。");
+        document.getElementById("onlineRoleText").textContent="接続失敗";
+    },10000);
+
+    try{
+        onlinePeer=new Peer({debug:0,host:"0.peerjs.com",port:443,path:"/"});
+    }catch(err){
+        clearTimeout(joinTimeout);
+        onlineSetStatus("オンライン通信を開始できませんでした。");
+        document.getElementById("onlineRoleText").textContent="通信開始失敗";
+        return;
+    }
+
+    onlinePeer.on("open",()=>{
+        if(joinFinished) return;
+        onlineSetStatus("ホストへ接続しています…");
+        const conn=onlinePeer.connect(target,{reliable:true,serialization:"json"});
+        onlineConnections.host=conn;
+
+        conn.on("open",()=>{
+            if(joinFinished) return;
+            onlineSend(conn,{type:"hello",name:onlineName,icon:playerProfile.icon});
+        });
+        conn.on("data",data=>{
+            if(!data) return;
+            if(data.type==="assign"){
+                joinFinished=true;
+                clearTimeout(joinTimeout);
+                onlinePlayerSlot=Number(data.slot);
+                onlinePlayerCount=Math.max(onlinePlayerCount,onlinePlayerSlot+1);
+                onlineRoomCode=data.room||code;
+                players[onlinePlayerSlot].name=onlineName;
+                players[onlinePlayerSlot].icon=playerProfile.icon;
+                onlineShowRoom();
+                onlineSetStatus("参加しました。ホストがゲームを開始するまで待ってください。");
+            } else {
+                onlineHandleMessage(0,data);
+            }
+        });
+        conn.on("close",()=>{
+            if(!joinFinished){
+                clearTimeout(joinTimeout);
+                joinFinished=true;
+                onlineSetStatus("ホストとの接続が切れました。ホストが部屋を開いているか確認してください。");
+                document.getElementById("onlineRoleText").textContent="接続失敗";
+            } else {
+                onlineSetStatus("ホストとの接続が切れました。");
+            }
+        });
+        conn.on("error",err=>{
+            if(joinFinished) return;
+            clearTimeout(joinTimeout);
+            joinFinished=true;
+            onlineSetStatus("ルームに接続できませんでした。ホストが部屋を開いたままか、コードを確認してください。");
+            document.getElementById("onlineRoleText").textContent="接続失敗";
+        });
+    });
+    onlinePeer.on("error",err=>{
+        if(joinFinished) return;
+        clearTimeout(joinTimeout);
+        joinFinished=true;
+        const type=err && err.type ? err.type : "unknown";
+        if(type==="peer-unavailable"){
+            try{ if(onlinePeer) onlinePeer.destroy(); }catch(e){}
+            onlineConnections={};
+            onlineSetStatus("そのルームは見つかりません。ホストが部屋を作った状態で、6文字のコードを入力してください。");
+        }else if(type==="network" || type==="server-error" || type==="socket-error"){
+            onlineSetStatus("オンラインサーバーに接続できません。両方の端末でインターネット接続を確認してください。");
+        }else{
+            onlineSetStatus("ルームに接続できませんでした（"+type+"）。");
+        }
+        document.getElementById("onlineRoleText").textContent="接続失敗";
+    });
+}
+
+function onlineStartGame(){
+    if(!onlineIsHost || onlinePlayerCount<2 || onlineStarting) return;
+    onlineStarting=true;
+    cpuCount=onlinePlayerCount-1;
+    document.getElementById("onlineStartButton").disabled=true;
+    onlineSetStatus("ゲームを準備しています…");
+    onlineOverlay.classList.add("hidden");
+    rouletteOverlay.classList.remove("hidden");
+    rouletteName.textContent="?";
+    initializeGame();
+    onlineBroadcastState();
+}
+
+function onlineActuallyStart(){
+    onlineStarting=false;
+    document.getElementById("onlineStartButton").disabled=false;
+    onlineOverlay.classList.add("hidden");
+    rouletteOverlay.classList.remove("hidden");
+    rouletteName.textContent="?";
+    initializeGame();
+    onlineBroadcastState();
+}
+
+function openOnlineMenu(){
+    updateOnlineChatVisibility();
+    clearChatHistory();
+    setMessageTab("log");
+    mainMenuOverlay.classList.add("hidden");
+    settingsOverlay.classList.add("hidden");
+    onlineOverlay.classList.remove("hidden");
+    document.getElementById("onlineHomePanel").classList.remove("hidden");
+    document.getElementById("onlineRoomPanel").classList.add("hidden");
+    onlineSetStatus("部屋を作るか、ルームコードで参加してください。");
+}
+
+function leaveOnline(){
+    clearChatHistory();
+    setMessageTab("log");
+    onlineCloseConnections();
+    onlineMode=false; onlineIsHost=false; onlinePlayerSlot=0; onlinePlayerCount=1;
+    onlineOverlay.classList.add("hidden");
+    mainMenuOverlay.classList.remove("hidden");
+    gameStarted=false; gameOver=false;
+    document.getElementById("onlineBadge").style.display="none";
+}
+
+function openGameFromMenu(){
+    menuOverlay.classList.add("hidden");
+    mainMenuOverlay.classList.remove("hidden");
+}
+
+function returnToTitle(){
+
+    if(cpuTimer){
+        clearTimeout(cpuTimer);
+        cpuTimer = null;
+    }
+
+    if(onlineMode){
+        try{ leaveOnline(); }catch(e){}
+    }
+
+    onlineMode = false;
+    onlineIsHost = false;
+    onlineReady = false;
+    onlineStarting = false;
+
+    gameStarted = false;
+    gameOver = false;
+    rouletteRunning = false;
+    cpuProcessing = false;
+    unoProcessing = false;
+    awaitingColor = false;
+
+    winOverlay.classList.add("hidden");
+    colorOverlay.classList.add("hidden");
+    targetOverlay.classList.add("hidden");
+    hideTargetCounterOverlays();
+    pendingTargetEffect=null;
+    awaitingTarget=false;
+    targetCardPlayerIndex=null;
+    targetPlayerIndex=null;
+    rouletteOverlay.classList.add("hidden");
+    settingsOverlay.classList.add("hidden");
+    howToOverlay.classList.add("hidden");
+    mainMenuOverlay.classList.add("hidden");
+
+    menuOverlay.classList.remove("hidden");
+
+    resetUnoState();
+
+    showMessage("");
+}
+
+function openGameStart(){
+    // CPU対戦でもチャットタブを常に有効にする。
+    onlineMode=false;
+    onlineIsHost=false;
+    onlinePlayerSlot=0;
+    updateOnlineChatVisibility();
+    clearChatHistory();
+    setMessageTab("log");
+
+    /*
+     * ゲーム開始時にCPU人数の設定を確定し、
+     * 現在の人数に合わせて全員の手札を7枚ずつ配り直す。
+     * 設定変更後に古い手札が残ったり、人数と手札がずれるのを防ぐ。
+     */
+    applyCpuCount();
+    initializeGame();
+
+    mainMenuOverlay.classList.add("hidden");
+    settingsOverlay.classList.add("hidden");
+    howToOverlay.classList.add("hidden");
+    rouletteOverlay.classList.remove("hidden");
+    rouletteName.textContent = "?";
+}
+
+function openSettings(){
+    mainMenuOverlay.classList.add("hidden");
+    settingsOverlay.classList.remove("hidden");
+    if(playerNameInput) playerNameInput.value = playerProfile.name;
+    buildPlayerIconOptions();
+}
+
+function closeSettings(){
+    savePlayerProfile();
+    settingsOverlay.classList.add("hidden");
+    mainMenuOverlay.classList.remove("hidden");
+}
+
+function applyCpuCount(){
+    const value = Number(cpuCountSelect.value);
+    if(value >= 1 && value <= 3){
+        cpuCount = value;
+    }
+}
+
+cpuCountSelect.addEventListener("change", applyCpuCount);
+
+
+function startRoulette(){
+
+    if(onlineMode && !onlineIsHost){ return; }
+
+    if(rouletteRunning){
+        return;
+    }
+
+    rouletteRunning = true;
+
+    let count = 0;
+
+    const max =
+        22 +
+        Math.floor(
+            Math.random()*12
+        );
+
+    const interval =
+        setInterval(() => {
+
+            rouletteName.textContent =
+                players[
+                    count % (onlineMode ? onlinePlayerCount : cpuCount + 1)
+                ].name;
+
+            count++;
+
+            if(count>=max){
+
+                clearInterval(
+                    interval
+                );
+
+                currentPlayer =
+                    Math.floor(
+                        Math.random()*(onlineMode ? onlinePlayerCount : cpuCount + 1)
+                    );
+
+                rouletteName.textContent =
+                    players[
+                        currentPlayer
+                    ].name;
+
+                setTimeout(() => {
+
+                    onlineStarting=false;
+                    document.getElementById("onlineBadge").style.display=onlineMode ? "block" : "none";
+                    rouletteOverlay
+                        .classList
+                        .add("hidden");
+
+                    gameStarted = true;
+
+                    gameOver = false;
+
+                    resetUnoState();
+
+                    showMessage(
+                        `${players[currentPlayer].name}からスタート！`
+                    );
+
+                    render();
+
+                    rouletteRunning =
+                        false;
+
+                    startCurrentTurn();
+
+                },900);
+            }
+
+        },90);
+}
+
+
+function returnToMainMenu(){
+
+    if(onlineMode){
+        leaveOnline();
+        return;
+    }
+
+    if(cpuTimer){
+
+        clearTimeout(cpuTimer);
+
+        cpuTimer = null;
+    }
+
+    gameStarted = false;
+    gameOver = false;
+    rouletteRunning = false;
+    cpuProcessing = false;
+    unoProcessing = false;
+
+    winOverlay.classList.add("hidden");
+    colorOverlay.classList.add("hidden");
+    targetOverlay.classList.add("hidden");
+    awaitingTarget=false;
+    targetCardPlayerIndex=null;
+    targetPlayerIndex=null;
+    rouletteOverlay.classList.add("hidden");
+    settingsOverlay.classList.add("hidden");
+    menuOverlay.classList.add("hidden");
+    mainMenuOverlay.classList.remove("hidden");
+
+    resetUnoState();
+    showMessage("メニューからゲームを開始してください");
+    render();
+}
+
+
+function restartGame(){
+
+    if(cpuTimer){
+
+        clearTimeout(cpuTimer);
+
+        cpuTimer = null;
+    }
+
+    winOverlay
+        .classList
+        .add("hidden");
+
+    colorOverlay
+        .classList
+        .add("hidden");
+
+    rouletteOverlay
+        .classList
+        .remove("hidden");
+
+    winBox
+        .classList
+        .remove("exodia-win");
+
+    winTitle
+        .classList
+        .remove("exodia-win-title");
+
+    rouletteName.textContent =
+        "?";
+
+    playerSaidUno = false;
+
+    unoPenaltyApplied = false;
+
+    unoProcessing = false;
+
+    cpuProcessing = false;
+
+    initializeGame();
+}
+
+
+menuStartButton.addEventListener(
+    "click",
+    openGameFromMenu
+);
+
+mainGameStartButton.addEventListener("click", openGameStart);
+settingsButton.addEventListener("click", openSettings);
+settingsBackButton.addEventListener("click", closeSettings);
+howToButton?.addEventListener("click", () => {
+    mainMenuOverlay.classList.add("hidden");
+    howToOverlay.classList.remove("hidden");
+});
+howToBackButton?.addEventListener("click", () => {
+    howToOverlay.classList.add("hidden");
+    mainMenuOverlay.classList.remove("hidden");
+});
+document.getElementById("returnToTitleButton").addEventListener("click", returnToTitle);
+
+
+document.getElementById("onlineButton").addEventListener("click", openOnlineMenu);
+document.getElementById("onlineHostButton").addEventListener("click", onlineCreateRoom);
+document.getElementById("onlineJoinButton").addEventListener("click", onlineJoinRoom);
+document.getElementById("onlineBackButton").addEventListener("click", leaveOnline);
+document.getElementById("onlineLeaveButton").addEventListener("click", leaveOnline);
+document.getElementById("onlineStartButton").addEventListener("click", onlineStartGame);
+
+// オンライン待機中チャットの送信処理
+// form の submit を直接受け取り、ボタン押下・Enter の両方で送信できるようにする。
+if(onlineWaitingChatForm){
+    onlineWaitingChatForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        sendOnlineWaitingChat();
+    });
+}
+
+if(onlineWaitingChatInput){
+    onlineWaitingChatInput.addEventListener("keydown", (event) => {
+        if(event.key === "Enter" && !event.shiftKey){
+            event.preventDefault();
+            onlineWaitingChatForm?.requestSubmit();
+        }
+    });
+}
+
+document
+    .getElementById("rouletteStart")
+    .addEventListener(
+        "click",
+        startRoulette
+    );
+
+drawButton.addEventListener(
+    "click",
+    () => {
+        if(onlineMode && !onlineIsHost){
+            onlineSend(onlineConnections.host,{type:"action",action:"draw"});
+        }else{
+            playerDraw(onlineMode ? onlinePlayerSlot : 0);
+        }
+    }
+);
+
+
+restartButton.addEventListener(
+    "click",
+    restartGame
+);
+
+backToMenuButton.addEventListener(
+    "click",
+    returnToMainMenu
+);
+
+document
+    .getElementById("winRestart")
+    .addEventListener(
+        "click",
+        restartGame
+);
+
+document
+    .querySelectorAll(".color-button")
+    .forEach(button => {
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                if(onlineMode && !onlineIsHost){
+                    onlineSend(onlineConnections.host,{type:"action",action:"color",color:button.dataset.color});
+                    return;
+                }
+
+                selectColor(
+                    button.dataset.color,
+                    onlineMode ? onlinePlayerSlot : 0
+                );
+
+            }
+        );
+
+    });
+
+// 招待リンクからルームコードを自動取得して参加画面を開く
+(function(){
+    try{
+        const params=new URLSearchParams(window.location.search);
+        const inviteCode=(params.get("room")||params.get("invite")||"").trim().toUpperCase().replace(/\s/g,"");
+        if(inviteCode){
+            const input=document.getElementById("onlineRoomInput");
+            if(input) input.value=inviteCode;
+            setTimeout(()=>{
+                if(typeof openOnlineMenu === "function") openOnlineMenu();
+                setTimeout(()=>{
+                    const join=document.getElementById("onlineJoinButton");
+                    if(join) join.click();
+                },120);
+            },150);
+        }
+    }catch(e){}
+})();
+
+// 現在のルームコードから招待リンクを作成
+function getRoomInviteLink(){
+    if(!onlineRoomCode) return "";
+    const base=window.location.href.split("?")[0].split("#")[0];
+    return base+"?room="+encodeURIComponent(onlineRoomCode);
+}
+
+applyCpuCount();
+document.getElementById("onlineBadge").style.display="none";
+initializeGame();
+
+menuOverlay.classList.remove("hidden");
+rouletteOverlay.classList.add("hidden");
+
+
+if(luckyConfirmButton){
+    luckyConfirmButton.addEventListener("click",()=>{
+        if(!awaitingLuckyChoice || luckySelectedIndices.length !== 2) return;
+        const slot = pendingLuckyPlayerIndex;
+        if(onlineMode && !onlineIsHost){
+            const conn = onlineConnections.host;
+            if(!conn || !conn.open) return;
+            onlineSend(conn,{type:"action",action:"lucky",indices:luckySelectedIndices.slice()});
+        }else{
+            resolveLuckySelection(slot, luckySelectedIndices.slice());
+            if(onlineMode && onlineIsHost) onlineBroadcastState();
+        }
+    });
+}
+
+if(counterStackButton){
+    counterStackButton.addEventListener("click",()=>{
+        if(!awaitingCounterChoice) return;
+        const player = players[currentPlayer];
+        const hasCounter = player && Array.isArray(player.hand) &&
+            player.hand.some(card => card && card.type === "counter");
+        if(!hasCounter){
+            awaitingCounterChoice = false;
+            counterChoiceOverlay.classList.add("hidden");
+            finishPendingDraw(currentPlayer);
+            return;
+        }
+        counterPendingDraw(currentPlayer);
+    });
+}
+if(counterDrawButton){
+    counterDrawButton.addEventListener("click",()=>{
+        if(awaitingCounterChoice) finishPendingDraw(currentPlayer);
+    });
+}
+
+if(targetCounterButton){
+    targetCounterButton.addEventListener("click",()=>{
+        if(!pendingTargetEffect) return;
+        clearTargetCounterTimers();
+        targetCounterOverlay.classList.add("hidden");
+        resolveTargetCounter(currentPlayer);
+    });
+}
+if(targetCounterAcceptButton){
+    targetCounterAcceptButton.addEventListener("click",()=>{
+        if(!pendingTargetEffect) return;
+        finishTargetEffect("cancel");
+    });
+}
+if(targetCounterReverseButton){
+    targetCounterReverseButton.addEventListener("click",()=>{
+        if(!pendingTargetEffect) return;
+        finishTargetEffect("reverse");
+    });
+}
+if(targetCounterCancelButton){
+    targetCounterCancelButton.addEventListener("click",()=>{
+        if(!pendingTargetEffect) return;
+        finishTargetEffect("cancel");
+    });
+}
+</script>
+
+</body>
+</html>
