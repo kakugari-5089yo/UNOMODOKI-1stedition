@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>うのもどき EXODIA EDITION</title>
+    <!-- Socket.ioクライアントライブラリの読み込み -->
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        body { font-family: sans-serif; background: #222; color: #fff; margin: 20px; }
+        .screen { display: none; background: #333; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        .active { display: block; }
+        button { background: #e74c3c; color: white; border: none; padding: 10px 15px; font-size: 16px; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background: #c0392b; }
+        input { padding: 8px; font-size: 16px; border-radius: 4px; border: 1px solid #555; background: #444; color: white; }
+        .chat-box { background: #111; height: 150px; overflow-y: scroll; padding: 10px; border-radius: 4px; margin-bottom: 10px; }
+        .player-list { background: #444; padding: 10px; border-radius: 4px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+    <h1>うのもどき <span style="font-size:0.5em; color:#f1c40f;">EXODIA EDITION</span></h1>
+
+    <!-- 1. タイトル/モード選択画面 -->
+    <div id="titleScreen" class="screen active">
+        <h2>モード選択</h2>
+        <button onclick="switchScreen('gameScreen')">CPU対戦</button>
+        <button onclick="switchScreen('onlineScreen')">オンライン対戦</button>
+        <button onclick="alert('遊び方: 手札を無くすか、エグゾディアを5枚集めると勝利！')">遊び方</button>
+    </div>
+
+    <!-- 2. オンラインロビー画面 -->
+    <div id="onlineScreen" class="screen">
+        <h2>オンライン対戦</h2>
+        <p>部屋を作るか、ルームコードで参加してください。</p>
+        
+        <div style="margin-bottom:15px;">
+            <label>自分の名前: </label>
+            <input type="text" id="playerNameInput" value="うのもどきプレイヤー">
+        </div>
+
+        <div>
+            <button onclick="createRoom()">部屋を作る</button>
+            <hr style="border-color:#555;">
+            <input type="text" id="roomCodeInput" placeholder="ルームコードを入力">
+            <button onclick="joinRoom()">部屋に参加</button>
+        </div>
+        <br>
+        <button onclick="switchScreen('titleScreen')">タイトルに戻る</button>
+    </div>
+
+    <!-- 3. オンライン待機部屋画面 -->
+    <div id="waitingScreen" class="screen">
+        <h2>待機部屋: <span id="currentRoomCode" style="color:#f1c40f;">-</span></h2>
+        
+        <h3>参加プレイヤー</h3>
+        <div id="playerList" class="player-list">待機中...</div>
+
+        <h3>待機中チャット</h3>
+        <div id="chatBox" class="chat-box"></div>
+        <input type="text" id="chatInput" placeholder="メッセージを入力...">
+        <button onclick="sendChat()">送信</button>
+
+        <hr style="border-color:#555; margin:20px 0;">
+        <button id="startGameBtn" onclick="startGame()">ゲーム開始</button>
+        <button onclick="leaveRoom()">退出</button>
+    </div>
+
+    <!-- 4. メインゲーム画面 -->
+    <div id="gameScreen" class="screen">
+        <h2>対戦中（ターン: <span id="currentTurn">準備中</span>）</h2>
+        <div>山札: <span id="deckCount">0</span> | 場: <span id="fieldCard">0</span> | エグゾディア: <span id="exodiaCount">0 / 5</span></div>
+        <br>
+        <div id="opponentsArea">CPU / 他プレイヤーの手札情報が表示されます</div>
+        <hr style="border-color:#555;">
+        <h3>🐰 あなたの手札 (7枚)</h3>
+        <div id="myHand">【カード1】【カード2】【カード3】...</div>
+        <br>
+        <button onclick="alert('カードを引しました')">カードを引く</button>
+        <button onclick="alert('UNO!')">UNO!</button>
+        <button onclick="switchScreen('titleScreen')">リスタート / 終了</button>
+    </div>
+
+    <script>
+        // --- 画面切り替えシステム ---
+        function switchScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        // --- オンライン通信システム (Socket.io) ---
+        let socket;
+        let currentRoom = null;
+        let myName = "";
+
+        // サーバーに接続（ローカル環境、または公開後は自動でそのドメインに接続されます）
+        socket = io();
+
+        // 部屋作成（ランダムな4桁の数字）
+        function createRoom() {
+            const randomCode = Math.floor(1000 + Math.random() * 9000).toString();
+            document.getElementById('roomCodeInput').value = randomCode;
+            joinRoom();
+        }
+
+        // 部屋参加
+        function joinRoom() {
+            const roomCode = document.getElementById('roomCodeInput').value.trim();
+            myName = document.getElementById('playerNameInput').value.trim();
+
+            if (!roomCode) {
+                alert('ルームコードを入力してください。');
+                return;
+            }
+
+            currentRoom = roomCode;
+            document.getElementById('currentRoomCode').innerText = roomCode;
+
+            // サーバーに部屋参加を要請
+            socket.emit('join_room', { roomCode, playerName: myName });
+            switchScreen('waitingScreen');
+        }
+
+        // チャット送信
+        function sendChat() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message || !currentRoom) return;
+
+            socket.emit('send_chat', {
+                roomCode: currentRoom,
+                playerName: myName,
+                message: message
+            });
+            input.value = '';
+        }
+
+        // ゲーム開始ボタン押下
+        function startGame() {
+            if (!currentRoom) return;
+            socket.emit('start_game', { roomCode: currentRoom });
+        }
+
+        // 部屋から退出
+        function leaveRoom() {
+            location.reload(); // 手っ取り早く接続をリセットしてタイトルへ
+        }
+
+        // --- サーバーからのイベント受信処理 ---
+
+        // エラー受信
+        socket.on('error_message', (msg) => {
+            alert(msg);
+            switchScreen('onlineScreen');
+        });
+
+        // 部屋のプレイヤーデータ更新
+        socket.on('room_data', (data) => {
+            const listDiv = document.getElementById('playerList');
+            listDiv.innerHTML = '';
+            data.players.forEach((player, index) => {
+                listDiv.innerHTML += `<div>${index + 1}. 👤 ${player.name} ${player.id === socket.id ? '(あなた)' : ''}</div>`;
+            });
+        });
+
+        // チャット受信
+        socket.on('receive_chat', (data) => {
+            const chatBox = document.getElementById('chatBox');
+            chatBox.innerHTML += `<div><strong>${data.playerName}:</strong> ${data.message}</div>`;
+            chatBox.scrollTop = chatBox.scrollHeight; // 最下部へスクロール
+        });
+
+        // 全員一斉にゲーム開始
+        socket.on('game_start_confirmed', (data) => {
+            switchScreen('gameScreen');
+            document.getElementById('currentTurn').innerText = "対戦中";
+            
+            // 同室のプレイヤー一覧を画面に表示
+            const opponentsArea = document.getElementById('opponentsArea');
+            opponentsArea.innerHTML = "<strong>対戦相手:</strong><br>";
+            data.players.forEach(p => {
+                if (p.id !== socket.id) {
+                    opponentsArea.innerHTML += `👤 ${p.name} (手札: 7枚) <br>`;
+                }
+            });
+        });
+
+        // ゲーム中のアクションを受信した時の処理（拡張用）
+        socket.on('game_action_received', (data) => {
+            console.log("他のプレイヤーの行動を受信しました:", data);
+            // 例: カードがプレイされた、ドローされたなどの処理をここに肉付けしていきます
+        });
+    </script>
+</body>
+</html>
